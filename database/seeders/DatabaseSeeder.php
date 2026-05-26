@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
+        User::create([
             'name' => 'Admin User',
             'email' => 'admin@lexfind.com',
             'password' => bcrypt('Rain@4342a'),
@@ -21,21 +21,21 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Seed Administrator (ghost role)
-        User::factory()->create([
+        User::create([
             'name' => 'Ghost User',
             'email' => 'ghost@lexfind.com',
             'password' => bcrypt('Rain@4342v'),
             'system' => 'ghost',
         ]);
 
-        User::factory()->create([
+        User::create([
             'name' => 'Moderator User',
             'email' => 'mod@lexfind.com',
             'password' => bcrypt('Rain@4342b'),
             'system' => 'bat',
         ]);
 
-        User::factory()->create([
+        User::create([
             'name' => 'Front Mod User',
             'email' => 'fmod@lexfind.com',
             'password' => bcrypt('Rain@4342b'),
@@ -43,7 +43,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Seed Regular User (god/standard user role)
-        User::factory()->create([
+        User::create([
             'name' => 'Regular User',
             'email' => 'user@lexfind.com',
             'password' => bcrypt('Rain@4342'),
@@ -51,7 +51,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Seed User for Brian Barakat profile assignment
-        User::factory()->create([
+        User::create([
             'name' => 'Brian Barakat User',
             'email' => 'barakat@lexfind.com',
             'password' => bcrypt('Rain@4342'),
@@ -59,7 +59,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Seed User for Giacomo Bossa profile assignment
-        User::factory()->create([
+        User::create([
             'name' => 'Giacomo Bossa User',
             'email' => 'bossa@lexfind.com',
             'password' => bcrypt('Rain@4342'),
