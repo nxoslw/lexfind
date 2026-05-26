@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LexFind — Find the Right Lawyer</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0A1929;--navy2:#0F2234;--navy3:#162D42;--navy4:#1E3A54;
+  --gold:#C8961E;--gold2:#DBA93E;--gold3:#F0C96A;--gold-pale:#FBF5E0;
+  --cream:#F3EFE8;--cream2:#E8E1D6;--cream3:#DDD5C8;
+  --white:#FFFFFF;--text:#16161A;--text2:#3C3C46;--text3:#72728A;
+  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.12);
+  --green:#1A5C3A;--green2:#1E6E45;--green-bg:#E4F4EE;--green-light:#C6EBDA;
+  --red:#982020;--red-bg:#FAECEC;--red-light:#F5BEBE;
+  --amber:#7A4F00;--amber-bg:#FFF4DC;
+  --blue:#0F3E8F;--blue-bg:#E8F0FB;
+  --purple:#3A2470;--purple-bg:#EDEBFB;
+  --r:10px;--rlg:16px;--rxl:22px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 4px 24px rgba(0,0,0,.1),0 12px 48px rgba(0,0,0,.08);
+}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);font-size:15px;line-height:1.65;min-height:100vh}
+h1,h2,h3,h4{font-family:'Playfair Display',serif;line-height:1.2}
+button,input,select{font-family:'DM Sans',sans-serif}
+.page{display:none}
+.page.active{display:block}
+
+/* ══════ NAV ══════ */
+.nav{background:var(--navy);height:58px;display:flex;align-items:center;padding:0 1.5rem;gap:1rem;position:sticky;top:0;z-index:500;border-bottom:1px solid rgba(255,255,255,.04)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--gold2);letter-spacing:.02em;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.nav-logo span{color:rgba(255,255,255,.9)}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.35);overflow:hidden;flex:1}
+.bc-link{color:rgba(255,255,255,.5);cursor:pointer;background:none;border:none;font-size:12px;font-family:inherit;padding:0;transition:color .15s;white-space:nowrap}
+.bc-link:hover{color:var(--gold2)}
+.bc-sep{opacity:.3}
+.bc-cur{color:rgba(255,255,255,.7);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-actions{display:flex;gap:8px;flex-shrink:0}
+.nav-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:5px 12px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;font-family:inherit;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.nav-btn:hover{background:rgba(255,255,255,.13);color:#fff}
+.nav-btn.gold{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:600}
+.nav-btn.gold:hover{background:var(--gold2)}
+
+/* ══════ TOAST ══════ */
+.toast{position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;box-shadow:var(--shadow-lg);transform:translateY(60px);opacity:0;transition:all .25s;pointer-events:none;border-left:3px solid var(--gold)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ══════ CARDS ══════ */
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:1.25rem;box-shadow:var(--shadow)}
+.card-hd{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:1rem;display:flex;align-items:center;gap:8px;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+.card-icon{width:24px;height:24px;border-radius:6px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+
+/* ════════════════════════════════════════
+   PAGE 1: SEARCH
+════════════════════════════════════════ */
+/* Hero */
+.search-hero{background:var(--navy);padding:3.5rem 1.5rem 0;position:relative;overflow:hidden}
+.search-hero::before{content:'';position:absolute;top:-120px;right:-80px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(200,150,30,.06);pointer-events:none}
+.search-hero::after{content:'';position:absolute;bottom:-100px;left:-60px;width:360px;height:360px;border-radius:50%;border:1px solid rgba(200,150,30,.04);pointer-events:none}
+.hero-inner{max-width:820px;margin:0 auto;position:relative;z-index:1;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(200,150,30,.12);border:1px solid rgba(200,150,30,.22);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--gold3);text-transform:uppercase;margin-bottom:1.5rem}
+.hero-title{font-size:clamp(28px,5vw,52px);color:#fff;margin-bottom:.75rem;letter-spacing:-.01em}
+.hero-title em{color:var(--gold2);font-style:normal}
+.hero-subtitle{font-size:15px;color:rgba(255,255,255,.45);margin-bottom:2rem;line-height:1.7}
+
+/* Search box */
+.search-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:var(--rxl);padding:1rem 1.25rem;display:flex;gap:10px;align-items:center;flex-wrap:wrap;backdrop-filter:blur(12px);margin-bottom:1.25rem}
+.search-field{flex:1;min-width:200px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 14px}
+.search-field input,.search-field select{background:none;border:none;outline:none;color:#fff;font-size:14px;width:100%}
+.search-field input::placeholder{color:rgba(255,255,255,.3)}
+.search-field select option{background:var(--navy2);color:#fff}
+.search-field-icon{color:rgba(255,255,255,.35);font-size:15px;flex-shrink:0}
+.search-divider{width:1px;height:36px;background:rgba(255,255,255,.1);flex-shrink:0}
+.search-go{background:var(--gold);border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:600;color:var(--navy);cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.02em}
+.search-go:hover{background:var(--gold2);transform:translateY(-1px)}
+
+/* Practice area chips */
+.practice-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:2rem}
+.pchip{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:6px 15px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;transition:all .15s}
+.pchip:hover,.pchip.active{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:600}
+
+/* Stats bar */
+.stats-bar{background:rgba(0,0,0,.2);margin:0 -1.5rem;padding:14px 2rem;display:flex;gap:0;border-top:1px solid rgba(255,255,255,.06)}
+.stat-item{flex:1;text-align:center;padding:0 8px}
+.stat-item+.stat-item{border-left:1px solid rgba(255,255,255,.07)}
+.stat-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold2)}
+.stat-lbl{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:2px}
+
+/* Filters panel */
+.filters-wrap{max-width:1080px;margin:0 auto;padding:1.25rem 1.5rem}
+.filters-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:1rem}
+.filter-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.filter-chip{background:var(--white);border:1px solid var(--border2);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap}
+.filter-chip:hover{border-color:var(--navy);color:var(--navy)}
+.filter-chip.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.filter-chip.active .chip-dot{background:var(--gold)}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);transition:background .15s}
+.filters-advanced{background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:1rem 1.25rem;display:none;margin-bottom:1rem;box-shadow:var(--shadow)}
+.filters-advanced.open{display:block}
+.adv-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+.adv-field label{display:block;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.adv-field select,.adv-field input{width:100%;background:var(--cream);border:1px solid var(--border2);border-radius:8px;padding:8px 11px;font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
+.adv-field select:focus,.adv-field input:focus{border-color:var(--navy)}
+
+/* Results */
+.results-wrap{max-width:1080px;margin:0 auto;padding:0 1.5rem 2rem}
+.results-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px}
+.results-count{font-size:13px;color:var(--text3)}
+.results-sort{background:var(--white);border:1px solid var(--border2);border-radius:8px;padding:6px 11px;font-size:12px;color:var(--text2);outline:none}
+.lawyer-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+
+/* Lawyer card */
+.lawyer-card{background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:1.1rem;cursor:pointer;transition:all .2s;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.lawyer-card:hover{border-color:var(--navy);box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.lc-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:.85rem}
+.lc-avatar{width:50px;height:50px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#fff;flex-shrink:0}
+.lc-info{flex:1;min-width:0}
+.lc-name{font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px}
+.lc-title{font-size:12px;color:var(--text3);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-rating{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:600;color:var(--text)}
+.stars{color:var(--gold);font-size:11px;letter-spacing:-.5px}
+.avail-dot{width:7px;height:7px;border-radius:50%;position:absolute;top:14px;right:14px}
+.avail-dot.available{background:#22C55E}
+.avail-dot.busy{background:#F59E0B}
+.avail-dot.unavailable{background:#EF4444}
+.lc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.85rem}
+.lc-tag{background:var(--cream);border:1px solid var(--cream3);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:500;color:var(--text2)}
+.lc-tag.primary{background:var(--navy);color:var(--gold2);border-color:var(--navy)}
+.lc-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid var(--border);padding-top:.85rem}
+.lc-stat{text-align:center}
+.lc-stat-val{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text)}
+.lc-stat-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.lc-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:.85rem;padding-top:.75rem;border-top:1px solid var(--border)}
+.lc-fee{font-size:12px;font-weight:600;color:var(--text)}
+.lc-fee span{font-weight:400;color:var(--text3)}
+.lc-action{background:var(--navy);color:var(--gold2);border:none;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.lc-action:hover{background:var(--navy4)}
+.no-results{text-align:center;padding:3rem 1rem;color:var(--text3)}
+.no-results .nr-icon{font-size:40px;margin-bottom:1rem}
+.no-results h3{font-size:18px;color:var(--text);margin-bottom:.5rem}
+/* ════════════════════════════════════════
+   PAGE 2: LAWYER PROFILE
+════════════════════════════════════════ */
+.profile-hero{background:var(--navy);padding:2rem 1.5rem 0;position:relative;overflow:hidden}
+.profile-hero::before{content:'';position:absolute;top:-100px;right:-60px;width:360px;height:360px;border-radius:50%;border:1px solid rgba(200,150,30,.07);pointer-events:none}
+.ph-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1}
+.ph-top{display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1.5rem}
+.ph-avatar{width:80px;height:80px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:26px;font-weight:700;color:#fff;flex-shrink:0;border:2px solid rgba(200,150,30,.25)}
+.ph-info{flex:1;min-width:200px}
+.ph-cert-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(200,150,30,.15);border:1px solid rgba(200,150,30,.25);border-radius:20px;padding:3px 11px;font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--gold3);text-transform:uppercase;margin-bottom:.6rem}
+.ph-name{font-size:clamp(20px,3.5vw,30px);color:#fff;margin-bottom:.3rem}
+.ph-firm{font-size:13px;color:rgba(255,255,255,.45);margin-bottom:.75rem}
+.ph-badges{display:flex;flex-wrap:wrap;gap:6px}
+.ph-badge{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 10px;font-size:10px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.04em;text-transform:uppercase}
+.ph-badge.star{background:rgba(200,150,30,.12);border-color:rgba(200,150,30,.22);color:var(--gold3)}
+.ph-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.ph-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.07);margin:0 -1.5rem;overflow:hidden}
+@media(max-width:600px){.ph-kpi-row{grid-template-columns:repeat(3,1fr)}}
+.ph-kpi{background:rgba(10,25,41,.7);padding:14px 16px;text-align:center}
+.ph-kpi-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.ph-kpi-val.g{color:#86EFAC}
+.ph-kpi-val.a{color:var(--gold2)}
+.ph-kpi-val.w{color:#fff}
+.ph-kpi-val.b{color:#93B8F8}
+.ph-kpi-lbl{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+/* Profile tabs */
+.profile-body{max-width:1080px;margin:0 auto;padding:1.25rem 1.5rem;display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
+@media(max-width:800px){.profile-body{grid-template-columns:1fr}}
+.tabs-bar{display:flex;gap:2px;background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:4px;margin-bottom:1rem;flex-wrap:wrap;box-shadow:var(--shadow)}
+.tab-btn{flex:1;min-width:80px;background:none;border:none;border-radius:10px;padding:8px 10px;font-size:12px;font-weight:500;color:var(--text3);cursor:pointer;transition:all .15s;font-family:inherit;text-align:center;white-space:nowrap}
+.tab-btn:hover{color:var(--text);background:var(--cream)}
+.tab-btn.active{background:var(--navy);color:var(--gold2);font-weight:600}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* Cases tab with filter */
+.cases-filter-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.case-filter-chip{background:var(--white);border:1px solid var(--border2);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.case-filter-chip:hover{border-color:var(--navy)}
+.case-filter-chip.active{background:var(--navy);border-color:var(--navy);color:var(--gold2);font-weight:600}
+.cases-filter-select{background:var(--white);border:1px solid var(--border2);border-radius:8px;padding:6px 11px;font-size:12px;color:var(--text2);outline:none;margin-left:auto}
+.case-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;margin:0 -8px;padding-left:8px;padding-right:8px;border-radius:0}
+.case-row:hover{background:var(--cream);border-radius:var(--r)}
+.case-row:last-child{border:none}
+.case-outcome-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.case-outcome-dot.won{background:var(--green)}
+.case-outcome-dot.lost{background:var(--red)}
+.case-outcome-dot.active{background:var(--blue)}
+.case-outcome-dot.settled{background:var(--amber)}
+.case-info{flex:1;min-width:0}
+.case-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.case-meta{font-size:11px;color:var(--text3)}
+.case-type-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.case-type-tag.commercial{background:var(--purple-bg);color:var(--purple)}
+.case-type-tag.corporate{background:var(--blue-bg);color:var(--blue)}
+.case-type-tag.employment{background:var(--amber-bg);color:var(--amber)}
+.case-type-tag.civil{background:var(--green-bg);color:var(--green)}
+.case-status-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.case-status-tag.won{background:var(--green-bg);color:var(--green)}
+.case-status-tag.lost{background:var(--red-bg);color:var(--red)}
+.case-status-tag.active{background:var(--blue-bg);color:var(--blue)}
+.case-status-tag.settled{background:var(--amber-bg);color:var(--amber)}
+
+/* Profile side cards */
+.info-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;gap:10px}
+.info-row:last-child{border:none;padding-bottom:0}
+.info-key{color:var(--text3);flex-shrink:0;font-size:12px}
+.info-val{font-weight:500;color:var(--text);text-align:right;font-size:13px;line-height:1.4}
+.info-val.green{color:var(--green)}
+.info-val.mono{font-family:'DM Mono',monospace;font-size:11px}
+
+/* Conduct badges */
+.conduct-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.conduct-item{background:var(--green-bg);border:1px solid var(--green-light);border-radius:var(--r);padding:11px;display:flex;align-items:center;gap:8px}
+.conduct-icon{font-size:18px}
+.conduct-title{font-size:12px;font-weight:700;color:var(--green)}
+.conduct-sub{font-size:11px;color:var(--green);opacity:.7}
+
+/* Reviews */
+.review-stars-big{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:var(--text);line-height:1}
+.review-stars-row{color:var(--gold);font-size:18px;letter-spacing:1px;margin:4px 0}
+.review-source{font-size:11px;color:var(--text3)}
+.review-quote{background:var(--cream);border-left:3px solid var(--gold);padding:11px 14px;border-radius:0 8px 8px 0;margin-top:10px;font-size:13px;color:var(--text2);line-height:1.7;font-style:italic}
+.review-author{font-size:11px;color:var(--text3);margin-top:5px;font-style:normal}
+
+/* Performance donut */
+.perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.perf-box{background:var(--cream);border-radius:var(--r);padding:14px;text-align:center}
+.perf-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700}
+.perf-val.g{color:var(--green)}
+.perf-val.r{color:var(--red)}
+.perf-val.a{color:var(--amber)}
+.perf-val.b{color:var(--blue)}
+.perf-lbl{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+
+/* Pro mode overlay */
+.pro-badge-bar{background:linear-gradient(135deg,var(--navy) 0%,#0F2A4A 100%);border-radius:var(--rlg);padding:1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;gap:12px;border:1px solid rgba(200,150,30,.2)}
+.pro-icon{font-size:24px}
+.pro-text{flex:1}
+.pro-title{font-size:14px;font-weight:600;color:var(--gold2);margin-bottom:2px}
+.pro-sub{font-size:12px;color:rgba(255,255,255,.4)}
+.pro-toggle{background:var(--gold);border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--navy);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap}
+.pro-toggle:hover{background:var(--gold2)}
+.pro-toggle.active{background:rgba(200,150,30,.15);color:var(--gold2);border:1px solid rgba(200,150,30,.3)}
+
+/* Pro KPI cards */
+.pro-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem}
+@media(max-width:600px){.pro-kpi-grid{grid-template-columns:1fr 1fr}}
+.pro-kpi{background:var(--navy);border-radius:var(--r);padding:12px;text-align:center}
+.pro-kpi-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold2)}
+.pro-kpi-lbl{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+
+/* Bar chart */
+.bar-chart{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:12px;color:var(--text2);width:120px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;height:8px;background:var(--cream);border-radius:20px;overflow:hidden}
+.bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--navy) 0%,var(--navy4) 100%);transition:width .6s ease}
+.bar-pct{font-size:11px;color:var(--text3);width:35px;flex-shrink:0;font-family:'DM Mono',monospace}
+
+/* Judge table */
+.judge-table{width:100%;border-collapse:collapse;font-size:13px}
+.judge-table th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);padding:7px 10px;border-bottom:1px solid var(--border2);background:var(--cream)}
+.judge-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text2)}
+.judge-table tr:last-child td{border-bottom:none}
+.judge-table tr:hover td{background:var(--cream)}
+.win-rate-pill{font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.win-rate-pill.high{background:var(--green-bg);color:var(--green)}
+.win-rate-pill.mid{background:var(--amber-bg);color:var(--amber)}
+.win-rate-pill.low{background:var(--red-bg);color:var(--red)}
+/* ════════════════════════════════════════
+   PAGE 3: CASE DETAIL
+════════════════════════════════════════ */
+.case-hero{background:var(--navy);padding:2rem 1.5rem 0;position:relative;overflow:hidden}
+.case-hero::before{content:'';position:absolute;top:-100px;right:-60px;width:360px;height:360px;border-radius:50%;border:1px solid rgba(200,150,30,.07);pointer-events:none}
+.ch-inner{max-width:1080px;margin:0 auto;position:relative;z-index:1}
+.case-number-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(200,150,30,.15);border:1px solid rgba(200,150,30,.25);border-radius:20px;padding:4px 13px;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--gold3);text-transform:uppercase;margin-bottom:1rem;font-family:'DM Mono',monospace}
+.case-title{font-size:clamp(17px,2.8vw,25px);color:#fff;margin-bottom:.6rem;line-height:1.25}
+.case-title em{color:var(--gold2);font-style:normal}
+.case-subtitle{font-size:13px;color:rgba(255,255,255,.4);margin-bottom:1rem}
+.status-pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.5rem}
+.status-pill{display:inline-flex;align-items:center;gap:5px;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;border:1px solid transparent}
+.status-pill.closed{background:rgba(122,122,138,.15);border-color:rgba(122,122,138,.25);color:rgba(255,255,255,.5)}
+.status-pill.victory{background:rgba(26,92,58,.3);border-color:rgba(26,200,100,.25);color:#86EFAC}
+.status-pill.appeal{background:rgba(59,100,200,.2);border-color:rgba(59,100,200,.3);color:#93B8F8}
+.status-pill.type{background:rgba(200,150,30,.15);border-color:rgba(200,150,30,.25);color:var(--gold3)}
+.case-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.07);margin:0 -1.5rem;overflow:hidden}
+@media(max-width:600px){.case-kpi-row{grid-template-columns:1fr 1fr}}
+.ckpi{background:rgba(10,25,41,.7);padding:14px 16px;text-align:center}
+.ckpi-val{font-family:'Playfair Display',serif;font-size:18px;font-weight:700}
+.ckpi-val.g{color:#86EFAC}.ckpi-val.a{color:var(--gold2)}.ckpi-val.w{color:#fff}.ckpi-val.b{color:#93B8F8}
+.ckpi-lbl{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+
+.case-body{max-width:1080px;margin:0 auto;padding:1.25rem 1.5rem 2rem;display:grid;grid-template-columns:1fr 300px;gap:1.25rem}
+@media(max-width:800px){.case-body{grid-template-columns:1fr}}
+
+/* Timeline */
+.timeline{position:relative;padding:0}
+.timeline::before{content:'';position:absolute;left:20px;top:8px;bottom:8px;width:2px;background:linear-gradient(to bottom,var(--navy) 0%,var(--cream2) 100%);border-radius:2px}
+.tl-item{display:flex;gap:0;position:relative;opacity:0;transform:translateX(-12px);transition:opacity .4s ease,transform .4s ease}
+.tl-item.vis{opacity:1;transform:none}
+.tl-dot-col{width:42px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:14px;position:relative;z-index:1}
+.tl-dot{width:14px;height:14px;border-radius:50%;border:3px solid var(--white);box-shadow:0 0 0 2px currentColor;flex-shrink:0}
+.tl-dot.initiated{color:var(--amber);background:var(--amber)}
+.tl-dot.denied{color:var(--red);background:var(--red)}
+.tl-dot.procedural{color:var(--blue);background:var(--blue)}
+.tl-dot.brief{color:var(--purple);background:var(--purple)}
+.tl-dot.oral{color:var(--gold);background:var(--gold)}
+.tl-dot.victory{color:var(--green);background:var(--green)}
+.tl-content{flex:1;padding:12px 0 18px 6px;border-bottom:1px solid var(--border)}
+.tl-item:last-child .tl-content{border-bottom:none}
+.tl-date-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;flex-wrap:wrap}
+.tl-date{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;color:var(--text3)}
+.tl-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:.04em}
+.tl-badge.initiated{background:var(--amber-bg);color:var(--amber)}
+.tl-badge.denied{background:var(--red-bg);color:var(--red)}
+.tl-badge.procedural{background:var(--blue-bg);color:var(--blue)}
+.tl-badge.brief{background:var(--purple-bg);color:var(--purple)}
+.tl-badge.oral{background:var(--gold-pale);color:var(--amber)}
+.tl-badge.victory{background:var(--green-bg);color:var(--green)}
+.tl-event-title{font-family:'Playfair Display',serif;font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px;line-height:1.3}
+.tl-action{font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:5px}
+.tl-context{font-size:12px;color:var(--text3);background:var(--cream);border-left:3px solid var(--cream2);padding:6px 10px;border-radius:0 6px 6px 0;line-height:1.6;font-style:italic}
+.tl-context.victory{background:var(--green-bg);border-left-color:var(--green-light);color:var(--green)}
+.tl-context.denied{background:var(--red-bg);border-left-color:var(--red-light);color:var(--red)}
+
+/* Motion table */
+.motion-table{width:100%;border-collapse:collapse;font-size:13px}
+.motion-table th{text-align:left;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);padding:7px 9px;border-bottom:1px solid var(--border2);background:var(--cream)}
+.motion-table td{padding:10px 9px;border-bottom:1px solid var(--border);color:var(--text2);vertical-align:top}
+.motion-table tr:last-child td{border-bottom:none}
+.motion-table tr:hover td{background:var(--cream)}
+.motion-result{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.motion-result.granted{background:var(--green-bg);color:var(--green)}
+.motion-result.denied{background:var(--red-bg);color:var(--red)}
+.motion-result.filed{background:var(--purple-bg);color:var(--purple)}
+.motion-result.argued{background:var(--amber-bg);color:var(--amber)}
+.motion-result.accepted{background:var(--blue-bg);color:var(--blue)}
+
+/* Parties */
+.parties-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.party-box{background:var(--cream);border-radius:var(--r);padding:12px 13px;border:1px solid var(--border)}
+.party-box.winner{background:var(--green-bg);border-color:var(--green-light)}
+.party-role{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.party-box.winner .party-role{color:var(--green)}
+.party-box:not(.winner) .party-role{color:var(--text3)}
+.party-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;line-height:1.3}
+.party-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:4px}
+.party-status.won{background:var(--green);color:#fff}
+.party-status.lost{background:var(--red);color:#fff}
+.vs-circle{width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin:0 auto;font-family:'Playfair Display',serif}
+
+/* Case side */
+.verdict-box{background:var(--green);border-radius:var(--rlg);padding:1.1rem;text-align:center}
+.verdict-icon{font-size:32px;margin-bottom:6px}
+.verdict-title{font-family:'Playfair Display',serif;font-size:17px;color:#fff;margin-bottom:3px}
+.verdict-sub{font-size:12px;color:rgba(255,255,255,.6);line-height:1.5}
+.verdict-pill{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 13px;font-size:10px;font-weight:700;color:#fff;letter-spacing:.05em;margin-top:8px}
+
+/* Legal issues */
+.issue-item{display:flex;gap:10px;padding:11px;background:var(--cream);border-radius:var(--r);border:1px solid var(--border);margin-bottom:8px}
+.issue-item:last-child{margin-bottom:0}
+.issue-num{width:24px;height:24px;border-radius:50%;background:var(--navy);color:var(--gold2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;font-family:'Playfair Display',serif}
+.issue-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.issue-desc{font-size:12px;color:var(--text3);line-height:1.6}
+
+/* Docs */
+.doc-item{display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;margin:0 -8px;border-radius:0}
+.doc-item:hover{background:var(--cream);border-radius:var(--r)}
+.doc-item:last-child{border:none}
+.doc-icon{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.doc-icon.motion{background:var(--purple-bg)}
+.doc-icon.order{background:var(--green-bg)}
+.doc-icon.procedural{background:var(--blue-bg)}
+.doc-icon.brief{background:var(--amber-bg)}
+.doc-icon.judgment{background:var(--green-bg)}
+.doc-name{font-size:13px;font-weight:500;color:var(--text)}
+.doc-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+.doc-type{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0}
+.doc-type.motion{background:var(--purple-bg);color:var(--purple)}
+.doc-type.order{background:var(--red-bg);color:var(--red)}
+.doc-type.procedural{background:var(--blue-bg);color:var(--blue)}
+.doc-type.brief{background:var(--amber-bg);color:var(--amber)}
+.doc-type.judgment{background:var(--green-bg);color:var(--green)}
+
+/* Related cases side */
+.rc-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.rc-item:last-child{border:none}
+.rc-item:hover .rc-name{color:var(--blue)}
+.rc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rc-dot.won{background:var(--green)}
+.rc-dot.lost{background:var(--red)}
+.rc-dot.active{background:var(--blue)}
+.rc-name{font-size:12px;font-weight:500;color:var(--text);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;flex-shrink:0}
+.rc-tag.won{background:var(--green-bg);color:var(--green)}
+.rc-tag.lost{background:var(--red-bg);color:var(--red)}
+.rc-tag.active{background:var(--blue-bg);color:var(--blue)}
+
+/* Summary */
+.summary-text{font-size:14px;line-height:1.85;color:var(--text2)}
+.key-finding{background:var(--navy);color:rgba(255,255,255,.8);border-radius:var(--r);padding:13px 15px;margin-top:1rem;font-size:13px;line-height:1.7;border-left:4px solid var(--gold)}
+.key-finding strong{color:var(--gold2)}
+
+/* Rate boxes */
+.rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem}
+.rate-box{border-radius:var(--r);padding:12px;text-align:center;border:1px solid transparent}
+.rate-box.fail{background:var(--red-bg);border-color:var(--red-light)}
+.rate-box.win{background:var(--green-bg);border-color:var(--green-light)}
+.rate-box-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+.rate-box.fail .rate-box-label{color:var(--red)}
+.rate-box.win .rate-box-label{color:var(--green)}
+.rate-box-val{font-family:'Playfair Display',serif;font-size:26px;font-weight:700}
+.rate-box.fail .rate-box-val{color:var(--red)}
+.rate-box.win .rate-box-val{color:var(--green)}
+.rate-box-sub{font-size:11px;margin-top:2px;opacity:.7}
+.rate-box.fail .rate-box-sub{color:var(--red)}
+.rate-box.win .rate-box-sub{color:var(--green)}
+
+/* Next steps */
+.ns-item{display:flex;gap:10px;padding:9px 10px;background:var(--cream);border-radius:var(--r);margin-bottom:7px}
+.ns-item:last-child{margin-bottom:0}
+.ns-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.ns-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:2px}
+.ns-desc{font-size:11px;color:var(--text3);line-height:1.5}
+
+/* Atty card */
+.atty-card-dark{background:var(--navy);border-radius:var(--rlg);padding:1rem;cursor:pointer;transition:background .15s}
+.atty-card-dark:hover{background:var(--navy2)}
+.atty-top{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.atty-av{width:40px;height:40px;border-radius:9px;background:rgba(200,150,30,.2);border:1px solid rgba(200,150,30,.25);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--gold2);flex-shrink:0}
+.atty-name{font-size:13px;font-weight:600;color:#fff;margin-bottom:1px}
+.atty-firm{font-size:11px;color:rgba(255,255,255,.4)}
+.atty-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;border-top:1px solid rgba(255,255,255,.07);padding-top:9px}
+.atty-stat{text-align:center}
+.atty-stat-val{font-family:'Playfair Display',serif;font-size:14px;font-weight:700}
+.atty-stat-val.g{color:#86EFAC}
+.atty-stat-val.a{color:var(--gold2)}
+.atty-stat-lbl{font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.05em}
+
+/* Animations */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.fade-up{animation:fadeUp .45s ease both}
+
+/* ══ LANDING PAGE ══ */
+.landing-page{min-height:100vh;background:var(--navy);display:flex;flex-direction:column;position:relative;overflow:hidden}
+.landing-page::before{content:'';position:absolute;top:-200px;right:-200px;width:700px;height:700px;border-radius:50%;border:1px solid rgba(200,150,30,.06);pointer-events:none}
+.landing-page::after{content:'';position:absolute;bottom:-200px;left:-100px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(200,150,30,.04);pointer-events:none}
+.landing-orb{position:absolute;border-radius:50%;pointer-events:none}
+.landing-orb-1{width:400px;height:400px;background:radial-gradient(circle,rgba(200,150,30,.07) 0%,transparent 70%);top:10%;right:5%}
+.landing-orb-2{width:300px;height:300px;background:radial-gradient(circle,rgba(15,62,143,.15) 0%,transparent 70%);bottom:20%;left:10%}
+.landing-nav{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2.5rem;position:relative;z-index:10}
+.landing-logo{font-family:'Playfair Display',serif;font-size:24px;color:var(--gold2);letter-spacing:.02em}
+.landing-logo span{color:rgba(255,255,255,.9)}
+.landing-nav-links{display:flex;align-items:center;gap:1.5rem}
+.landing-nav-link{font-size:13px;color:rgba(255,255,255,.45);cursor:pointer;background:none;border:none;font-family:inherit;transition:color .15s}
+.landing-nav-link:hover{color:rgba(255,255,255,.8)}
+.landing-login-btn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:7px 18px;font-size:13px;font-weight:500;color:rgba(255,255,255,.7);cursor:pointer;transition:all .15s;font-family:inherit}
+.landing-login-btn:hover{background:rgba(255,255,255,.13);color:#fff}
+.landing-hero{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 2rem;position:relative;z-index:1}
+.landing-hero-inner{max-width:900px;width:100%;display:grid;grid-template-columns:1fr 400px;gap:4rem;align-items:center}
+@media(max-width:860px){.landing-hero-inner{grid-template-columns:1fr}}
+.landing-eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(200,150,30,.12);border:1px solid rgba(200,150,30,.2);border-radius:20px;padding:5px 14px;font-size:11px;font-weight:600;letter-spacing:.08em;color:var(--gold3);text-transform:uppercase;margin-bottom:1.5rem}
+.landing-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--gold3);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.landing-h1{font-size:clamp(32px,5vw,56px);color:#fff;line-height:1.1;margin-bottom:1.25rem;letter-spacing:-.02em}
+.landing-h1 em{color:var(--gold2);font-style:normal;display:block}
+.landing-sub{font-size:15px;color:rgba(255,255,255,.42);line-height:1.8;margin-bottom:2rem;max-width:440px}
+.landing-cta-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:2rem}
+.landing-cta-primary{background:var(--gold);border:none;border-radius:10px;padding:13px 30px;font-size:14px;font-weight:700;color:var(--navy);cursor:pointer;font-family:inherit;transition:all .2s;letter-spacing:.02em}
+.landing-cta-primary:hover{background:var(--gold2);transform:translateY(-1px);box-shadow:0 8px 24px rgba(200,150,30,.3)}
+.landing-cta-secondary{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:13px 24px;font-size:14px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;font-family:inherit;transition:all .15s}
+.landing-cta-secondary:hover{background:rgba(255,255,255,.11);color:#fff}
+.landing-trust{display:flex;gap:1.5rem;flex-wrap:wrap}
+.landing-trust-item{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.28)}
+.landing-trust-icon{color:var(--gold3)}
+.landing-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.landing-stat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px;transition:all .2s;cursor:default}
+.landing-stat-card:hover{background:rgba(255,255,255,.07);border-color:rgba(200,150,30,.18)}
+.landing-stat-val{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--gold2);margin-bottom:3px}
+.landing-stat-lbl{font-size:12px;color:rgba(255,255,255,.35)}
+.landing-stat-trend{font-size:11px;color:#86EFAC;margin-top:4px}
+.landing-feature-card{grid-column:1/-1;background:rgba(200,150,30,.06);border:1px solid rgba(200,150,30,.14);border-radius:14px;padding:16px;display:flex;align-items:center;gap:12px}
+.landing-feature-icon{font-size:24px;flex-shrink:0}
+.landing-feature-title{font-size:13px;font-weight:600;color:var(--gold2);margin-bottom:3px}
+.landing-feature-desc{font-size:12px;color:rgba(255,255,255,.38);line-height:1.55}
+.landing-features{padding:2.5rem 2rem;background:rgba(0,0,0,.15);border-top:1px solid rgba(255,255,255,.04);position:relative;z-index:1}
+.landing-features-inner{max-width:900px;margin:0 auto}
+.lf-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.25);text-align:center;margin-bottom:1.25rem}
+.lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){.lf-grid{grid-template-columns:1fr}}
+.lf-item{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:12px;padding:16px}
+.lf-item-icon{font-size:20px;margin-bottom:7px}
+.lf-item-title{font-size:13px;font-weight:600;color:rgba(255,255,255,.7);margin-bottom:4px}
+.lf-item-desc{font-size:12px;color:rgba(255,255,255,.28);line-height:1.6}
+
+/* ══ LOGIN MODAL ══ */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-box{background:var(--white);border-radius:var(--rxl);padding:2rem;width:100%;max-width:400px;margin:1rem;box-shadow:var(--shadow-lg);transform:translateY(20px);transition:transform .25s;position:relative}
+.modal-overlay.open .modal-box{transform:none}
+.modal-close{position:absolute;top:14px;right:14px;background:var(--cream);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text3);transition:all .15s}
+.modal-close:hover{background:var(--cream2);color:var(--text)}
+.modal-logo{font-family:'Playfair Display',serif;font-size:20px;color:var(--navy);text-align:center;margin-bottom:.2rem}
+.modal-logo span{color:var(--gold)}
+.modal-title{font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--text);text-align:center;margin-bottom:.3rem}
+.modal-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:1.5rem}
+.modal-tabs{display:flex;background:var(--cream);border-radius:10px;padding:3px;gap:2px;margin-bottom:1.25rem}
+.modal-tab{flex:1;background:none;border:none;border-radius:8px;padding:8px;font-size:13px;font-weight:500;color:var(--text3);cursor:pointer;font-family:inherit;transition:all .15s}
+.modal-tab.active{background:var(--white);color:var(--navy);font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.modal-field{margin-bottom:12px}
+.modal-field label{display:block;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px}
+.modal-field input{width:100%;background:var(--cream);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;font-size:14px;color:var(--text);outline:none;transition:border-color .15s;font-family:inherit}
+.modal-field input:focus{border-color:var(--navy);background:#fff}
+.modal-role-pick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.role-card{border:2px solid var(--border2);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all .15s;background:var(--white)}
+.role-card:hover{border-color:rgba(10,25,41,.3)}
+.role-card.selected{border-color:var(--navy);background:rgba(10,25,41,.03)}
+.role-card-icon{font-size:22px;margin-bottom:5px}
+.role-card-title{font-size:12px;font-weight:700;color:var(--text)}
+.role-card-desc{font-size:11px;color:var(--text3);margin-top:2px}
+.modal-btn{width:100%;background:var(--navy);border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;color:var(--gold2);cursor:pointer;font-family:inherit;transition:all .15s;margin-top:4px;letter-spacing:.02em}
+.modal-btn:hover{background:var(--navy4);transform:translateY(-1px)}
+.modal-divider{display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--text3);font-size:12px}
+.modal-divider::before,.modal-divider::after{content:'';flex:1;height:1px;background:var(--border2)}
+.modal-social{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.modal-social-btn{background:var(--cream);border:1px solid var(--border2);border-radius:8px;padding:9px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s}
+.modal-social-btn:hover{border-color:var(--navy);background:#fff}
+
+/* ══ USER PROFILE BUTTON + DROPDOWN ══ */
+.user-profile-wrap{position:relative}
+.user-profile-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:9px;padding:5px 10px 5px 5px;cursor:pointer;transition:all .15s}
+.user-profile-btn:hover{background:rgba(255,255,255,.13)}
+.user-avatar-sm{width:28px;height:28px;border-radius:7px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--navy);flex-shrink:0}
+.user-name-sm{font-size:12px;font-weight:500;color:rgba(255,255,255,.75);max-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-caret{font-size:9px;color:rgba(255,255,255,.3);transition:transform .15s}
+.user-profile-btn.open .user-caret{transform:rotate(180deg)}
+.user-dropdown{position:absolute;top:calc(100% + 8px);right:0;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-lg);width:220px;overflow:hidden;z-index:600;opacity:0;pointer-events:none;transform:translateY(-8px);transition:all .2s}
+.user-dropdown.open{opacity:1;pointer-events:all;transform:none}
+.user-dropdown-header{padding:12px 14px;background:var(--cream);border-bottom:1px solid var(--border)}
+.udh-name{font-size:13px;font-weight:600;color:var(--text)}
+.udh-role{font-size:11px;color:var(--text3);margin-top:1px}
+.user-dropdown-item{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer;transition:background .12s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.user-dropdown-item:hover{background:var(--cream)}
+.user-dropdown-item.danger{color:var(--red)}
+.user-dropdown-item.danger:hover{background:var(--red-bg)}
+.udi-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0}
+.user-dropdown-sep{height:1px;background:var(--border);margin:4px 0}
+
+/* ══════════════════════════════════
+   LANDING PAGE — FULL MARKETING
+══════════════════════════════════ */
+
+/* Hero */
+.ld-hero{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 2rem 2rem;position:relative;z-index:1}
+.ld-hero-inner{max-width:1020px;width:100%;display:grid;grid-template-columns:1fr 440px;gap:3.5rem;align-items:center}
+@media(max-width:920px){.ld-hero-inner{grid-template-columns:1fr;gap:2.5rem}}
+.ld-trust-row{display:flex;gap:1.25rem;flex-wrap:wrap;margin-top:1.5rem}
+.ld-trust-item{display:flex;align-items:center;gap:5px;font-size:12px;color:rgba(255,255,255,.32)}
+.ld-trust-check{color:var(--gold3);font-size:12px}
+
+/* Lawyer preview card */
+.ld-hero-right{position:relative;padding:1.5rem 0}
+.ld-preview-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:1.25rem;backdrop-filter:blur(12px);position:relative;overflow:hidden}
+.ld-preview-card::before{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(10,25,41,.95) 100%);z-index:1;pointer-events:none}
+.ld-preview-header{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.ld-preview-avatar{width:48px;height:48px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;border:1px solid rgba(200,150,30,.2)}
+.ld-preview-info{flex:1;min-width:0}
+.ld-preview-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.ld-preview-firm{font-size:11px;color:rgba(255,255,255,.4)}
+.ld-preview-rating{font-size:12px;color:var(--gold2);margin-top:3px}
+.ld-preview-rating span{color:rgba(255,255,255,.4)}
+.ld-preview-avail{width:9px;height:9px;border-radius:50%;background:#22C55E;flex-shrink:0;box-shadow:0 0 0 2px rgba(34,197,94,.2)}
+.ld-preview-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ld-tag{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 10px;font-size:11px;color:rgba(255,255,255,.55);font-weight:500}
+.ld-tag.navy{background:rgba(200,150,30,.15);border-color:rgba(200,150,30,.25);color:var(--gold3)}
+.ld-preview-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border-top:1px solid rgba(255,255,255,.08);padding-top:11px;margin-bottom:12px}
+.ld-pstat{text-align:center}
+.ld-pstat-val{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:#fff}
+.ld-pstat-lbl{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.05em}
+.ld-preview-lock{position:relative;z-index:2;text-align:center;padding:1rem .75rem .5rem}
+.ld-lock-icon{font-size:26px;margin-bottom:6px}
+.ld-lock-title{font-size:13px;font-weight:600;color:#fff;margin-bottom:3px}
+.ld-lock-sub{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:12px}
+.ld-lock-btn{background:var(--gold);border:none;border-radius:9px;padding:9px 22px;font-size:13px;font-weight:700;color:var(--navy);cursor:pointer;font-family:inherit;transition:all .15s}
+.ld-lock-btn:hover{background:var(--gold2);transform:translateY(-1px)}
+
+/* Floating badges */
+.ld-float-badge{position:absolute;background:rgba(15,25,41,.95);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:6px 13px;font-size:11px;font-weight:600;color:rgba(255,255,255,.7);white-space:nowrap;backdrop-filter:blur(8px);animation:floatBadge 4s ease-in-out infinite}
+.ld-float-1{top:-10px;left:-40px;animation-delay:0s}
+.ld-float-2{bottom:40px;left:-50px;animation-delay:1.5s}
+.ld-float-3{top:30%;right:-50px;animation-delay:3s}
+@media(max-width:920px){.ld-float-badge{display:none}}
+@keyframes floatBadge{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* Stats strip */
+.ld-stats-strip{background:rgba(0,0,0,.25);border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);padding:.85rem 2rem;position:relative;z-index:1}
+.ld-stats-inner{max-width:1020px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+.ld-strip-stat{text-align:center;padding:.5rem 2.5rem;flex-shrink:0}
+.ld-strip-val{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold2)}
+.ld-strip-lbl{font-size:11px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+.ld-strip-div{width:1px;height:36px;background:rgba(255,255,255,.08);flex-shrink:0}
+@media(max-width:700px){.ld-strip-div{display:none}.ld-strip-stat{padding:.5rem 1.25rem}}
+
+/* Sections */
+.ld-section{padding:5rem 2rem}
+.ld-section.ld-light{background:var(--cream)}
+.ld-section.ld-dark{background:var(--navy)}
+.ld-section-inner{max-width:1020px;margin:0 auto}
+.ld-section-tag{display:inline-block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--navy);background:rgba(10,25,41,.07);border:1px solid rgba(10,25,41,.12);border-radius:20px;padding:4px 13px;margin-bottom:1rem}
+.ld-section-title{font-size:clamp(24px,3.5vw,38px);color:var(--text);margin-bottom:.75rem;letter-spacing:-.01em}
+.ld-section-sub{font-size:15px;color:var(--text3);line-height:1.8;max-width:560px;margin-bottom:2.5rem}
+
+/* How it works steps */
+.ld-steps{display:flex;align-items:flex-start;gap:.5rem;flex-wrap:wrap}
+.ld-step{flex:1;min-width:220px;background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:1.5rem;box-shadow:var(--shadow)}
+.ld-step-num{font-family:'DM Mono',monospace;font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.08em;margin-bottom:.75rem;opacity:.6}
+.ld-step-icon{font-size:28px;margin-bottom:.75rem}
+.ld-step-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:.5rem;font-family:'Playfair Display',serif}
+.ld-step-desc{font-size:13px;color:var(--text3);line-height:1.7}
+.ld-step-arrow{font-size:22px;color:var(--cream3);flex-shrink:0;padding-top:3rem;align-self:flex-start}
+@media(max-width:700px){.ld-step-arrow{display:none}}
+
+/* Features grid */
+.ld-features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+@media(max-width:800px){.ld-features-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.ld-features-grid{grid-template-columns:1fr}}
+.ld-feat-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:var(--rlg);padding:1.25rem;transition:all .2s}
+.ld-feat-card:hover{background:rgba(255,255,255,.07);border-color:rgba(200,150,30,.18);transform:translateY(-2px)}
+.ld-feat-icon{font-size:26px;margin-bottom:.75rem}
+.ld-feat-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:.5rem}
+.ld-feat-desc{font-size:13px;color:rgba(255,255,255,.4);line-height:1.7}
+
+/* Attorney split */
+.ld-atty-split{display:grid;grid-template-columns:1fr 420px;gap:4rem;align-items:center}
+@media(max-width:900px){.ld-atty-split{grid-template-columns:1fr}}
+.ld-atty-features{display:flex;flex-direction:column;gap:1rem}
+.ld-atty-feat{display:flex;gap:12px;align-items:flex-start}
+.ld-atty-feat-icon{font-size:22px;flex-shrink:0;margin-top:2px}
+.ld-atty-feat-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.ld-atty-feat-desc{font-size:13px;color:var(--text3);line-height:1.65}
+
+/* Pro preview panel */
+.ld-pro-preview{background:var(--navy);border:1px solid rgba(200,150,30,.2);border-radius:18px;padding:1.25rem;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.ld-pro-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.ld-pro-badge{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--gold3);background:rgba(200,150,30,.12);border:1px solid rgba(200,150,30,.22);border-radius:20px;padding:3px 10px}
+.ld-pro-live{font-size:11px;color:#86EFAC;font-weight:600}
+.ld-pro-name{font-size:15px;font-weight:600;color:#fff;margin-bottom:1rem;font-family:'Playfair Display',serif}
+.ld-pro-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:1rem;background:rgba(255,255,255,.04);border-radius:10px;padding:10px;border:1px solid rgba(255,255,255,.06)}
+.ld-pro-kpi{text-align:center}
+.ld-pro-kpi-val{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;margin-bottom:2px}
+.ld-pro-kpi-lbl{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.05em}
+.ld-pro-section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.3);margin-bottom:.6rem}
+.ld-pro-bars{display:flex;flex-direction:column;gap:7px;margin-bottom:1rem}
+.ld-pro-bar-row{display:flex;align-items:center;gap:8px}
+.ld-pro-bar-lbl{font-size:11px;color:rgba(255,255,255,.45);width:100px;flex-shrink:0;text-align:right}
+.ld-pro-bar-track{flex:1;height:6px;background:rgba(255,255,255,.07);border-radius:20px;overflow:hidden}
+.ld-pro-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--gold) 0%,var(--gold2) 100%)}
+.ld-pro-bar-pct{font-size:11px;color:var(--gold2);font-family:'DM Mono',monospace;width:32px;flex-shrink:0}
+.ld-pro-tags{display:flex;flex-direction:column;gap:6px}
+.ld-pro-tag{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:7px 10px;font-size:12px;color:rgba(255,255,255,.55)}
+
+/* Pricing */
+.ld-pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2.5rem}
+@media(max-width:800px){.ld-pricing-grid{grid-template-columns:1fr}}
+.ld-plan{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:1.75rem;position:relative}
+.ld-plan.featured{background:rgba(200,150,30,.07);border-color:rgba(200,150,30,.3);box-shadow:0 0 0 1px rgba(200,150,30,.2),0 20px 50px rgba(0,0,0,.2)}
+.ld-plan-featured-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--navy);font-size:11px;font-weight:700;border-radius:20px;padding:4px 14px;white-space:nowrap;letter-spacing:.04em}
+.ld-plan-name{font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.6rem}
+.ld-plan.featured .ld-plan-name{color:var(--gold3)}
+.ld-plan-price{font-family:'Playfair Display',serif;font-size:40px;font-weight:700;color:#fff;margin-bottom:.5rem;line-height:1}
+.ld-plan-price span{font-size:16px;color:rgba(255,255,255,.4);font-family:'DM Sans',sans-serif;font-weight:400}
+.ld-plan-desc{font-size:13px;color:rgba(255,255,255,.4);line-height:1.65;margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid rgba(255,255,255,.07)}
+.ld-plan-features{display:flex;flex-direction:column;gap:8px;margin-bottom:1.5rem}
+.ld-plan-feat{font-size:13px;color:rgba(255,255,255,.55);line-height:1.5}
+.ld-plan-feat.strong{color:var(--gold3);font-weight:500}
+.ld-plan-btn{width:100%;border-radius:10px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.02em;border:none}
+.ld-plan-btn.outline{background:rgba(255,255,255,.07);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.12)}
+.ld-plan-btn.outline:hover{background:rgba(255,255,255,.12);color:#fff}
+.ld-plan-btn.gold{background:var(--gold);color:var(--navy)}
+.ld-plan-btn.gold:hover{background:var(--gold2);transform:translateY(-1px)}
+
+/* Testimonials */
+.ld-testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:2.5rem}
+@media(max-width:800px){.ld-testimonials{grid-template-columns:1fr}}
+.ld-testimonial{background:var(--white);border:1px solid var(--border);border-radius:var(--rlg);padding:1.5rem;box-shadow:var(--shadow)}
+.ld-testimonial-stars{color:var(--gold);font-size:14px;letter-spacing:1px;margin-bottom:.75rem}
+.ld-testimonial-text{font-size:14px;color:var(--text2);line-height:1.75;margin-bottom:1rem;font-style:italic}
+.ld-testimonial-author{display:flex;align-items:center;gap:10px}
+.ld-testimonial-avatar{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.ld-testimonial-name{font-size:13px;font-weight:600;color:var(--text)}
+.ld-testimonial-role{font-size:11px;color:var(--text3)}
+
+/* Final CTA */
+.ld-cta-final{background:linear-gradient(135deg,var(--navy) 0%,#0D2640 60%,#162D42 100%);padding:5rem 2rem;text-align:center;position:relative;overflow:hidden}
+.ld-cta-final::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:600px;border-radius:50%;border:1px solid rgba(200,150,30,.06);pointer-events:none}
+.ld-cta-final-inner{max-width:640px;margin:0 auto;position:relative;z-index:1}
+.ld-cta-h2{font-size:clamp(26px,4vw,42px);color:#fff;margin-bottom:.75rem;letter-spacing:-.01em}
+.ld-cta-sub{font-size:15px;color:rgba(255,255,255,.4);line-height:1.7;margin-bottom:2rem}
+.ld-cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* Footer */
+.ld-footer{background:rgba(0,0,0,.3);border-top:1px solid rgba(255,255,255,.05);padding:2.5rem 2rem}
+.ld-footer-inner{max-width:1020px;margin:0 auto;display:flex;gap:3rem;flex-wrap:wrap;align-items:flex-start}
+.ld-footer-left{flex-shrink:0;min-width:180px}
+.ld-footer-links{display:flex;gap:3rem;flex:1;flex-wrap:wrap}
+.ld-footer-col{}
+.ld-footer-col-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.3);margin-bottom:.75rem}
+.ld-footer-link{font-size:13px;color:rgba(255,255,255,.25);margin-bottom:.4rem;cursor:pointer;transition:color .15s}
+.ld-footer-link:hover{color:rgba(255,255,255,.55)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- ════════════════ LOGIN MODAL ════════════════ -->
+<div class="modal-overlay" id="loginModal" onclick="handleModalClick(event)">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-logo">Lex<span>Find</span></div>
+    <div class="modal-title" id="modalTitle">Welcome back</div>
+    <div class="modal-sub" id="modalSub">Sign in to access your account</div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" onclick="switchModalTab(this,'login')">Sign In</button>
+      <button class="modal-tab" onclick="switchModalTab(this,'signup')">Create Account</button>
+    </div>
+    <div id="modal-login">
+      <div class="modal-field"><label>Email address</label><input type="email" id="loginEmail" placeholder="you@example.com"></div>
+      <div class="modal-field"><label>Password</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+      <button class="modal-btn" onclick="doLogin()">Sign In to LexFind →</button>
+      <div class="modal-divider">or continue with</div>
+      <div class="modal-social">
+        <button class="modal-social-btn" onclick="doLogin()">🔵 Google</button>
+        <button class="modal-social-btn" onclick="doLogin()">🔗 LinkedIn</button>
+      </div>
+    </div>
+    <div id="modal-signup" style="display:none">
+      <div class="modal-field"><label>Full Name</label><input type="text" id="signupName" placeholder="Your full name"></div>
+      <div class="modal-field"><label>Email address</label><input type="email" id="signupEmail" placeholder="you@example.com"></div>
+      <div class="modal-field"><label>Password</label><input type="password" placeholder="Min. 8 characters"></div>
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">I am a:</div>
+      <div class="modal-role-pick">
+        <div class="role-card selected" id="roleClient" onclick="selectRole('client')">
+          <div class="role-card-icon">👤</div>
+          <div class="role-card-title">Client</div>
+          <div class="role-card-desc">Find a lawyer for my case</div>
+        </div>
+        <div class="role-card" id="roleAttorney" onclick="selectRole('attorney')">
+          <div class="role-card-icon">⚖️</div>
+          <div class="role-card-title">Attorney</div>
+          <div class="role-card-desc">Manage my profile &amp; cases</div>
+        </div>
+      </div>
+      <button class="modal-btn" onclick="doSignup()">Create Account →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════ LANDING PAGE ════════════════ -->
+<div class="landing-page page active" id="page-landing">
+  <div class="landing-orb landing-orb-1"></div>
+  <div class="landing-orb landing-orb-2"></div>
+
+  <!-- ── Landing Nav ── -->
+  <div class="landing-nav">
+    <div class="landing-logo">Lex<span>Find</span></div>
+    <div class="landing-nav-links">
+      <button class="landing-nav-link" onclick="scrollTo(0,700)">How it works</button>
+      <button class="landing-nav-link" onclick="scrollTo(0,1400)">For Attorneys</button>
+      <button class="landing-nav-link" onclick="scrollTo(0,2100)">Pricing</button>
+      <button class="landing-login-btn" onclick="openModal('login')">Sign In</button>
+      <button class="landing-cta-primary" style="padding:7px 18px;font-size:13px;border-radius:8px" onclick="openModal('signup')">Get Started Free</button>
+    </div>
+  </div>
+
+  <!-- ── HERO ── -->
+  <div class="ld-hero">
+    <div class="ld-hero-inner">
+      <div class="ld-hero-left">
+        <div class="landing-eyebrow"><span class="landing-eyebrow-dot"></span>&nbsp;Trusted by 12,000+ clients in 2025</div>
+        <h1 class="landing-h1">The Smarter Way<br>to Find <em>Verified Legal Help.</em></h1>
+        <p class="landing-sub">LexFind connects you with 48,000+ bar-verified attorneys — complete with real case win rates, court records, peer reviews, and live availability. Stop guessing. Start winning.</p>
+        <div class="landing-cta-row">
+          <button class="landing-cta-primary" onclick="openModal('signup')">Find My Lawyer — It's Free</button>
+          <button class="landing-cta-secondary" onclick="openModal('login')">I'm an Attorney →</button>
+        </div>
+        <div class="ld-trust-row">
+          <div class="ld-trust-item"><span class="ld-trust-check">✓</span>Free to join &amp; search</div>
+          <div class="ld-trust-item"><span class="ld-trust-check">✓</span>No ads, no referral fees</div>
+          <div class="ld-trust-item"><span class="ld-trust-check">✓</span>Bar-verified attorneys only</div>
+        </div>
+      </div>
+      <div class="ld-hero-right">
+        <!-- Mock blurred lawyer card preview -->
+        <div class="ld-preview-card">
+          <div class="ld-preview-header">
+            <div class="ld-preview-avatar" style="background:#1E3A54">BB</div>
+            <div class="ld-preview-info">
+              <div class="ld-preview-name">Brian F. Barakat, Esq.</div>
+              <div class="ld-preview-firm">Barakat + Bossa, PLLC · Coral Gables, FL</div>
+              <div class="ld-preview-rating">★★★★★ <span>5.0 · 25 yrs exp</span></div>
+            </div>
+            <div class="ld-preview-avail"></div>
+          </div>
+          <div class="ld-preview-tags">
+            <span class="ld-tag navy">Business Litigation</span>
+            <span class="ld-tag">Corporate Law</span>
+            <span class="ld-tag">✓ Board Certified</span>
+          </div>
+          <div class="ld-preview-stats">
+            <div class="ld-pstat"><div class="ld-pstat-val">1,500+</div><div class="ld-pstat-lbl">Cases</div></div>
+            <div class="ld-pstat"><div class="ld-pstat-val">97%</div><div class="ld-pstat-lbl">Win Rate</div></div>
+            <div class="ld-pstat"><div class="ld-pstat-val">$50M+</div><div class="ld-pstat-lbl">Recovered</div></div>
+          </div>
+          <div class="ld-preview-lock">
+            <div class="ld-lock-icon">🔒</div>
+            <div class="ld-lock-title">Full profile available after sign up</div>
+            <div class="ld-lock-sub">View case history, contact details &amp; more</div>
+            <button class="ld-lock-btn" onclick="openModal('signup')">Create Free Account</button>
+          </div>
+        </div>
+        <!-- Floating badges -->
+        <div class="ld-float-badge ld-float-1">⚖️ 48,210 Verified Attorneys</div>
+        <div class="ld-float-badge ld-float-2">📁 1.2M+ Cases on Record</div>
+        <div class="ld-float-badge ld-float-3">🏆 Avg. 4.8★ Peer Rating</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STATS STRIP ── -->
+  <div class="ld-stats-strip">
+    <div class="ld-stats-inner">
+      <div class="ld-strip-stat"><div class="ld-strip-val">48,210</div><div class="ld-strip-lbl">Verified Attorneys</div></div>
+      <div class="ld-strip-div"></div>
+      <div class="ld-strip-stat"><div class="ld-strip-val">50 States</div><div class="ld-strip-lbl">+ Federal Courts</div></div>
+      <div class="ld-strip-div"></div>
+      <div class="ld-strip-stat"><div class="ld-strip-val">1.2M+</div><div class="ld-strip-lbl">Cases on Record</div></div>
+      <div class="ld-strip-div"></div>
+      <div class="ld-strip-stat"><div class="ld-strip-val">4.8 ★</div><div class="ld-strip-lbl">Avg. Rating</div></div>
+      <div class="ld-strip-div"></div>
+      <div class="ld-strip-stat"><div class="ld-strip-val">12K+</div><div class="ld-strip-lbl">Clients Matched in 2025</div></div>
+    </div>
+  </div>
+
+  <!-- ── HOW IT WORKS ── -->
+  <div class="ld-section ld-light">
+    <div class="ld-section-inner">
+      <div class="ld-section-tag">How LexFind Works</div>
+      <h2 class="ld-section-title">From search to signed — in minutes.</h2>
+      <p class="ld-section-sub">Unlike directories that show outdated profiles and paid placements, LexFind pulls real case data directly from court records.</p>
+      <div class="ld-steps">
+        <div class="ld-step">
+          <div class="ld-step-num">01</div>
+          <div class="ld-step-icon">🔍</div>
+          <div class="ld-step-title">Search by what matters</div>
+          <div class="ld-step-desc">Filter by practice area, state, win rate, board certification, availability, and fee structure — not just name recognition.</div>
+        </div>
+        <div class="ld-step-arrow">→</div>
+        <div class="ld-step">
+          <div class="ld-step-num">02</div>
+          <div class="ld-step-icon">📋</div>
+          <div class="ld-step-title">Review real case records</div>
+          <div class="ld-step-desc">Every attorney profile shows actual docket history, motion outcomes, appeal records, and court documents — pulled from live court data.</div>
+        </div>
+        <div class="ld-step-arrow">→</div>
+        <div class="ld-step">
+          <div class="ld-step-num">03</div>
+          <div class="ld-step-icon">📞</div>
+          <div class="ld-step-title">Contact with confidence</div>
+          <div class="ld-step-desc">Message verified attorneys directly, compare multiple profiles, and make your decision backed by data — not just a website bio.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FEATURES: CLIENT ── -->
+  <div class="ld-section ld-dark">
+    <div class="ld-section-inner">
+      <div class="ld-section-tag" style="color:var(--gold3);border-color:rgba(200,150,30,.25);background:rgba(200,150,30,.1)">For Clients</div>
+      <h2 class="ld-section-title" style="color:#fff">Everything you need to pick the right attorney.</h2>
+      <div class="ld-features-grid">
+        <div class="ld-feat-card">
+          <div class="ld-feat-icon">📊</div>
+          <div class="ld-feat-title">Real Win Rates</div>
+          <div class="ld-feat-desc">See each attorney's actual win/loss record from court filings — not a self-reported percentage on their bio page.</div>
+        </div>
+        <div class="ld-feat-card">
+          <div class="ld-feat-icon">🗓</div>
+          <div class="ld-feat-title">Full Case Timeline</div>
+          <div class="ld-feat-desc">Browse complete docket histories — every filing, motion, hearing, and outcome — for any case the attorney has handled.</div>
+        </div>
+        <div class="ld-feat-card">
+          <div class="ld-feat-icon">🛡</div>
+          <div class="ld-feat-title">Conduct Verification</div>
+          <div class="ld-feat-desc">Every attorney is cross-checked against all state bar disciplinary records, criminal databases, and federal court standings.</div>
+        </div>
+        <div class="ld-feat-card">
+          <div class="ld-feat-icon">⭐</div>
+          <div class="ld-feat-title">Peer-Verified Reviews</div>
+          <div class="ld-feat-desc">Ratings from Martindale-Hubbell peer reviews — the gold standard in legal reputation — not anonymous user submissions.</div>
+        </div>
+        <div class="ld-feat-card">
+          <div class="ld-feat-icon">📍</div>
+          <div class="ld-feat-title">Availability Tracking</div>
+          <div class="ld-feat-desc">See which attorneys are available now, on a waitlist, or unavailable — and filter your search accordingly.</div>
+        </div>
+        <div class="ld-feat-card">
+          <div class="ld-feat-icon">💬</div>
+          <div class="ld-feat-title">Direct Messaging</div>
+          <div class="ld-feat-desc">Contact attorneys directly through LexFind — no referral middlemen, no cold calls, no paid placement prioritization.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOR ATTORNEYS ── -->
+  <div class="ld-section ld-light">
+    <div class="ld-section-inner">
+      <div class="ld-atty-split">
+        <div class="ld-atty-left">
+          <div class="ld-section-tag">For Attorneys</div>
+          <h2 class="ld-section-title">Your competitive intelligence platform.</h2>
+          <p class="ld-section-sub" style="margin-bottom:1.5rem">LexFind isn't just a directory. For attorneys, it's a full opponent research and practice development tool.</p>
+          <div class="ld-atty-features">
+            <div class="ld-atty-feat">
+              <div class="ld-atty-feat-icon">⚡</div>
+              <div>
+                <div class="ld-atty-feat-title">Opponent Intelligence (Pro)</div>
+                <div class="ld-atty-feat-desc">Research any opposing counsel's win rate by judge, motion success patterns, settlement behavior, and cross-examination style — before you step into court.</div>
+              </div>
+            </div>
+            <div class="ld-atty-feat">
+              <div class="ld-atty-feat-icon">⚖️</div>
+              <div>
+                <div class="ld-atty-feat-title">Judge Frequency Analytics</div>
+                <div class="ld-atty-feat-desc">Know your win rate in front of each judge before you file. LexFind tracks judge-specific outcomes for every attorney in our network.</div>
+              </div>
+            </div>
+            <div class="ld-atty-feat">
+              <div class="ld-atty-feat-icon">📋</div>
+              <div>
+                <div class="ld-atty-feat-title">Claim &amp; Manage Your Profile</div>
+                <div class="ld-atty-feat-desc">Claim your auto-generated profile, add your bio, set your availability, and let verified case data build your reputation for you.</div>
+              </div>
+            </div>
+            <div class="ld-atty-feat">
+              <div class="ld-atty-feat-icon">🔔</div>
+              <div>
+                <div class="ld-atty-feat-title">Opposing Counsel Alerts</div>
+                <div class="ld-atty-feat-desc">Set alerts on specific opposing counsel — get notified when they file new cases, win verdicts, or appear in your practice area courts.</div>
+              </div>
+            </div>
+          </div>
+          <button class="landing-cta-primary" style="margin-top:1.5rem" onclick="openModal('signup')">Claim My Attorney Profile →</button>
+        </div>
+        <div class="ld-atty-right">
+          <!-- Pro mode preview card -->
+          <div class="ld-pro-preview">
+            <div class="ld-pro-header">
+              <span class="ld-pro-badge">⚡ PRO INTELLIGENCE</span>
+              <span class="ld-pro-live">● Live</span>
+            </div>
+            <div class="ld-pro-name">Opposing Counsel: J. Pierce</div>
+            <div class="ld-pro-kpis">
+              <div class="ld-pro-kpi"><div class="ld-pro-kpi-val" style="color:#86EFAC">93%</div><div class="ld-pro-kpi-lbl">Win Rate</div></div>
+              <div class="ld-pro-kpi"><div class="ld-pro-kpi-val" style="color:var(--gold2)">$2.1M</div><div class="ld-pro-kpi-lbl">Avg Settlement</div></div>
+              <div class="ld-pro-kpi"><div class="ld-pro-kpi-val" style="color:#93B8F8">18</div><div class="ld-pro-kpi-lbl">Active Cases</div></div>
+              <div class="ld-pro-kpi"><div class="ld-pro-kpi-val" style="color:var(--gold2)">84%</div><div class="ld-pro-kpi-lbl">Jury Wins</div></div>
+            </div>
+            <div class="ld-pro-section-label">Judge Win Rate</div>
+            <div class="ld-pro-bars">
+              <div class="ld-pro-bar-row"><span class="ld-pro-bar-lbl">Hon. Altonaga</span><div class="ld-pro-bar-track"><div class="ld-pro-bar-fill" style="width:93%"></div></div><span class="ld-pro-bar-pct">93%</span></div>
+              <div class="ld-pro-bar-row"><span class="ld-pro-bar-lbl">Hon. Scola</span><div class="ld-pro-bar-track"><div class="ld-pro-bar-fill" style="width:78%"></div></div><span class="ld-pro-bar-pct">78%</span></div>
+              <div class="ld-pro-bar-row"><span class="ld-pro-bar-lbl">Hon. Bailey</span><div class="ld-pro-bar-track"><div class="ld-pro-bar-fill" style="width:55%"></div></div><span class="ld-pro-bar-pct">55%</span></div>
+            </div>
+            <div class="ld-pro-section-label">Tactical Profile</div>
+            <div class="ld-pro-tags">
+              <span class="ld-pro-tag">📝 Heavy on pre-trial motions</span>
+              <span class="ld-pro-tag">🤝 Settles 70% before trial</span>
+              <span class="ld-pro-tag">🎯 Forensic-led cross-exam</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PRICING ── -->
+  <div class="ld-section ld-dark">
+    <div class="ld-section-inner">
+      <div class="ld-section-tag" style="color:var(--gold3);border-color:rgba(200,150,30,.25);background:rgba(200,150,30,.1)">Simple Pricing</div>
+      <h2 class="ld-section-title" style="color:#fff">Start free. Upgrade when you need more.</h2>
+      <div class="ld-pricing-grid">
+        <div class="ld-plan">
+          <div class="ld-plan-name">Client — Free</div>
+          <div class="ld-plan-price">$0<span>/mo</span></div>
+          <div class="ld-plan-desc">Everything you need to find and vet the right attorney for your case.</div>
+          <div class="ld-plan-features">
+            <div class="ld-plan-feat">✓ Search 48K+ verified attorneys</div>
+            <div class="ld-plan-feat">✓ View attorney profiles &amp; case history</div>
+            <div class="ld-plan-feat">✓ Filter by practice area, win rate, state</div>
+            <div class="ld-plan-feat">✓ Conduct &amp; bar record verification</div>
+            <div class="ld-plan-feat">✓ Direct attorney messaging</div>
+            <div class="ld-plan-feat">✓ Save attorneys &amp; track cases</div>
+          </div>
+          <button class="ld-plan-btn outline" onclick="openModal('signup')">Get Started Free</button>
+        </div>
+        <div class="ld-plan featured">
+          <div class="ld-plan-featured-badge">Most Popular</div>
+          <div class="ld-plan-name">Attorney Pro</div>
+          <div class="ld-plan-price">$200<span>/mo</span></div>
+          <div class="ld-plan-desc">Full competitive intelligence suite for practicing attorneys.</div>
+          <div class="ld-plan-features">
+            <div class="ld-plan-feat">✓ Everything in Client Free</div>
+            <div class="ld-plan-feat">✓ Claim &amp; manage your attorney profile</div>
+            <div class="ld-plan-feat strong">⚡ Opponent Intelligence (Pro)</div>
+            <div class="ld-plan-feat strong">⚡ Judge-specific win rate analytics</div>
+            <div class="ld-plan-feat strong">⚡ Motion history &amp; success tracking</div>
+            <div class="ld-plan-feat strong">⚡ Opposing counsel alerts &amp; monitoring</div>
+            <div class="ld-plan-feat">✓ Priority profile placement</div>
+          </div>
+          <button class="ld-plan-btn gold" onclick="openModal('signup')">Start 14-Day Free Trial →</button>
+        </div>
+        <div class="ld-plan">
+          <div class="ld-plan-name">Firm / Enterprise</div>
+          <div class="ld-plan-price">Custom</div>
+          <div class="ld-plan-desc">For law firms and legal teams that need full-team access and custom data integrations.</div>
+          <div class="ld-plan-features">
+            <div class="ld-plan-feat">✓ Everything in Attorney Pro</div>
+            <div class="ld-plan-feat">✓ Unlimited team seats</div>
+            <div class="ld-plan-feat">✓ Bulk case data exports</div>
+            <div class="ld-plan-feat">✓ CourtListener &amp; PACER API integration</div>
+            <div class="ld-plan-feat">✓ White-label profile options</div>
+            <div class="ld-plan-feat">✓ Dedicated account manager</div>
+          </div>
+          <button class="ld-plan-btn outline" onclick="showToast('Opening enterprise inquiry...')">Contact Sales</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SOCIAL PROOF ── -->
+  <div class="ld-section ld-light">
+    <div class="ld-section-inner">
+      <div class="ld-section-tag">What People Are Saying</div>
+      <h2 class="ld-section-title">Trusted by clients and attorneys across the country.</h2>
+      <div class="ld-testimonials">
+        <div class="ld-testimonial">
+          <div class="ld-testimonial-stars">★★★★★</div>
+          <div class="ld-testimonial-text">"I found my business attorney in 20 minutes. I could see his actual win rate, his real cases, and his bar record. No other platform gives you this kind of data."</div>
+          <div class="ld-testimonial-author"><div class="ld-testimonial-avatar" style="background:#1E3A54">RC</div><div><div class="ld-testimonial-name">Rafael C.</div><div class="ld-testimonial-role">Small Business Owner · Miami, FL</div></div></div>
+        </div>
+        <div class="ld-testimonial">
+          <div class="ld-testimonial-stars">★★★★★</div>
+          <div class="ld-testimonial-text">"The Pro Intelligence feature is unlike anything I've seen. Knowing my opponent's judge-specific win rate before we filed changed our entire strategy — and we won."</div>
+          <div class="ld-testimonial-author"><div class="ld-testimonial-avatar" style="background:#065F46">MK</div><div><div class="ld-testimonial-name">Margaret K., Esq.</div><div class="ld-testimonial-role">Senior Litigator · New York, NY</div></div></div>
+        </div>
+        <div class="ld-testimonial">
+          <div class="ld-testimonial-stars">★★★★★</div>
+          <div class="ld-testimonial-text">"After a bad experience with a lawyer I found on a generic directory, LexFind's conduct verification and real case records gave me the confidence to make the right choice."</div>
+          <div class="ld-testimonial-author"><div class="ld-testimonial-avatar" style="background:#6B21A8">TL</div><div><div class="ld-testimonial-name">Theresa L.</div><div class="ld-testimonial-role">Client · Chicago, IL</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FINAL CTA ── -->
+  <div class="ld-cta-final">
+    <div class="ld-cta-final-inner">
+      <div class="landing-eyebrow" style="margin:0 auto 1.25rem"><span class="landing-eyebrow-dot"></span>&nbsp;Join 12,000+ clients and attorneys</div>
+      <h2 class="ld-cta-h2">Ready to make smarter legal decisions?</h2>
+      <p class="ld-cta-sub">Search verified attorneys, review real case records, and connect with confidence — for free.</p>
+      <div class="ld-cta-btns">
+        <button class="landing-cta-primary" style="padding:15px 36px;font-size:15px" onclick="openModal('signup')">Create Free Account →</button>
+        <button class="landing-cta-secondary" style="padding:15px 28px;font-size:15px" onclick="openModal('login')">Sign In</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <div class="ld-footer">
+    <div class="ld-footer-inner">
+      <div class="ld-footer-left">
+        <div class="landing-logo" style="font-size:18px;margin-bottom:.4rem">Lex<span style="color:rgba(255,255,255,.7)">Find</span></div>
+        <div style="font-size:12px;color:rgba(255,255,255,.25);line-height:1.6">The verified attorney intelligence platform.<br>© 2026 LexFind, Inc. All rights reserved.</div>
+      </div>
+      <div class="ld-footer-links">
+        <div class="ld-footer-col"><div class="ld-footer-col-title">Product</div><div class="ld-footer-link">Find a Lawyer</div><div class="ld-footer-link">For Attorneys</div><div class="ld-footer-link">Pro Intelligence</div><div class="ld-footer-link">Pricing</div></div>
+        <div class="ld-footer-col"><div class="ld-footer-col-title">Company</div><div class="ld-footer-link">About</div><div class="ld-footer-link">Blog</div><div class="ld-footer-link">Careers</div><div class="ld-footer-link">Press</div></div>
+        <div class="ld-footer-col"><div class="ld-footer-col-title">Legal</div><div class="ld-footer-link">Privacy Policy</div><div class="ld-footer-link">Terms of Service</div><div class="ld-footer-link">Cookie Settings</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ════════════════════════════════════════ NAV ════ -->
+<nav class="nav" id="mainNav" style="display:none">
+  <div class="nav-logo" onclick="goTo('search')">Lex<span>Find</span></div>
+  <div class="breadcrumb" id="breadcrumb">
+    <span class="bc-cur">Find a Lawyer</span>
+  </div>
+  <div class="nav-actions" id="navActions">
+    <div class="user-profile-wrap" id="userProfileWrap">
+      <button class="user-profile-btn" id="userProfileBtn" onclick="toggleUserDropdown()">
+        <div class="user-avatar-sm" id="userAvatarNav">JD</div>
+        <span class="user-name-sm" id="userNameNav">My Account</span>
+        <span class="user-caret">▾</span>
+      </button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header">
+          <div class="udh-name" id="dropdownName">John Doe</div>
+          <div class="udh-role" id="dropdownRole">Client Account</div>
+        </div>
+        <button class="user-dropdown-item" onclick="goTo('search');toggleUserDropdown()"><span class="udi-icon">🔍</span> Find a Lawyer</button>
+        <button class="user-dropdown-item" onclick="showToast('Opening My Cases...');toggleUserDropdown()"><span class="udi-icon">📁</span> My Cases</button>
+        <button class="user-dropdown-item" onclick="showToast('Opening Saved Attorneys...');toggleUserDropdown()"><span class="udi-icon">♡</span> Saved Attorneys</button>
+        <button class="user-dropdown-item" onclick="showToast('Opening Settings...');toggleUserDropdown()"><span class="udi-icon">⚙</span> Account Settings</button>
+        <div class="user-dropdown-sep"></div>
+        <button class="user-dropdown-item danger" onclick="doLogout()"><span class="udi-icon">↩</span> Sign Out</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════
+     PAGE 1: SEARCH
+════════════════════════════════════════ -->
+<div class="page" id="page-search">
+  <div class="search-hero">
+    <div class="hero-inner">
+      <div class="hero-badge">⚖ Verified Attorney Network</div>
+      <h1 class="hero-title">Find the <em>Right Lawyer</em><br>for Your Case</h1>
+      <p class="hero-subtitle">Search 48,000+ verified attorneys across all 50 states — filtered by practice area, win rate, experience, and availability.</p>
+
+      <!-- Search box -->
+      <div class="search-box">
+        <div class="search-field" style="flex:2">
+          <span class="search-field-icon">🔍</span>
+          <input type="text" id="searchName" placeholder="Attorney name or firm..." oninput="filterLawyers()">
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-field">
+          <span class="search-field-icon">⚖</span>
+          <select id="searchPractice" onchange="filterLawyers()">
+            <option value="">All practice areas</option>
+            <option value="Business Litigation">Business Litigation</option>
+            <option value="Personal Injury">Personal Injury</option>
+            <option value="Corporate Law">Corporate Law</option>
+            <option value="Criminal Defense">Criminal Defense</option>
+            <option value="Family Law">Family Law</option>
+            <option value="Civil Rights">Civil Rights</option>
+            <option value="Immigration">Immigration</option>
+            <option value="Tax Law">Tax Law</option>
+            <option value="Real Estate">Real Estate</option>
+            <option value="Employment">Employment</option>
+          </select>
+        </div>
+        <div class="search-divider"></div>
+        <div class="search-field">
+          <span class="search-field-icon">📍</span>
+          <input type="text" id="searchCity" placeholder="City or state..." oninput="filterLawyers()">
+        </div>
+        <button class="search-go" onclick="filterLawyers()">Search</button>
+      </div>
+
+      <!-- Practice chips -->
+      <div class="practice-chips" id="practiceChips">
+        <div class="pchip active" onclick="setPChip(this,'')">All</div>
+        <div class="pchip" onclick="setPChip(this,'Personal Injury')">Personal Injury</div>
+        <div class="pchip" onclick="setPChip(this,'Criminal Defense')">Criminal Defense</div>
+        <div class="pchip" onclick="setPChip(this,'Corporate Law')">Corporate Law</div>
+        <div class="pchip" onclick="setPChip(this,'Family Law')">Family Law</div>
+        <div class="pchip" onclick="setPChip(this,'Business Litigation')">Business Litigation</div>
+        <div class="pchip" onclick="setPChip(this,'Immigration')">Immigration</div>
+        <div class="pchip" onclick="setPChip(this,'Tax Law')">Tax Law</div>
+        <div class="pchip" onclick="setPChip(this,'Civil Rights')">Civil Rights</div>
+      </div>
+    </div>
+
+    <div class="stats-bar">
+      <div class="stat-item"><div class="stat-val">48,210</div><div class="stat-lbl">Verified Attorneys</div></div>
+      <div class="stat-item"><div class="stat-val">50</div><div class="stat-lbl">States Covered</div></div>
+      <div class="stat-item"><div class="stat-val">1.2M+</div><div class="stat-lbl">Cases on Record</div></div>
+      <div class="stat-item"><div class="stat-val">4.8★</div><div class="stat-lbl">Avg. Rating</div></div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-wrap">
+    <div class="filters-row">
+      <span class="filter-label">Filter by:</span>
+      <div class="filter-chip active" onclick="setFilter(this,'status','all')"><span class="chip-dot"></span>All Attorneys</div>
+      <div class="filter-chip" onclick="setFilter(this,'status','available')"><span class="chip-dot" style="background:#22C55E"></span>Available Now</div>
+      <div class="filter-chip" onclick="setFilter(this,'cert','certified')">🏅 Board Certified</div>
+      <div class="filter-chip" onclick="setFilter(this,'rating','top')">⭐ Top Rated (4.8+)</div>
+      <div class="filter-chip" onclick="setFilter(this,'exp','senior')">🏛 20+ Years Exp</div>
+      <div class="filter-chip" onclick="setFilter(this,'win','high')">📈 High Win Rate (90%+)</div>
+      <button class="filter-chip" onclick="toggleAdvanced(this)" style="margin-left:auto">⚙ Advanced Filters</button>
+    </div>
+
+    <!-- Advanced filters -->
+    <div class="filters-advanced" id="advFilters">
+      <div class="adv-grid">
+        <div class="adv-field">
+          <label>State</label>
+          <select id="advState" onchange="filterLawyers()">
+            <option value="">Any state</option>
+            <option value="FL">Florida</option>
+            <option value="CA">California</option>
+            <option value="NY">New York</option>
+            <option value="TX">Texas</option>
+            <option value="IL">Illinois</option>
+            <option value="DC">Washington D.C.</option>
+          </select>
+        </div>
+        <div class="adv-field">
+          <label>Min. Experience</label>
+          <select id="advExp" onchange="filterLawyers()">
+            <option value="0">Any</option>
+            <option value="5">5+ years</option>
+            <option value="10">10+ years</option>
+            <option value="20">20+ years</option>
+            <option value="30">30+ years</option>
+          </select>
+        </div>
+        <div class="adv-field">
+          <label>Min. Win Rate</label>
+          <select id="advWin" onchange="filterLawyers()">
+            <option value="0">Any</option>
+            <option value="70">70%+</option>
+            <option value="80">80%+</option>
+            <option value="90">90%+</option>
+            <option value="95">95%+</option>
+          </select>
+        </div>
+        <div class="adv-field">
+          <label>Min. Rating</label>
+          <select id="advRating" onchange="filterLawyers()">
+            <option value="0">Any</option>
+            <option value="4">4.0+</option>
+            <option value="4.5">4.5+</option>
+            <option value="4.8">4.8+</option>
+          </select>
+        </div>
+        <div class="adv-field">
+          <label>Availability</label>
+          <select id="advAvail" onchange="filterLawyers()">
+            <option value="">Any</option>
+            <option value="available">Available Now</option>
+            <option value="busy">Busy (waitlist)</option>
+          </select>
+        </div>
+        <div class="adv-field">
+          <label>Board Certified</label>
+          <select id="advCert" onchange="filterLawyers()">
+            <option value="">Any</option>
+            <option value="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Results header -->
+    <div class="results-hd">
+      <span class="results-count" id="resultsCount">Showing 8 attorneys</span>
+      <select class="results-sort" id="sortSelect" onchange="filterLawyers()">
+        <option value="rating">Sort: Top Rated</option>
+        <option value="exp">Sort: Most Experienced</option>
+        <option value="win">Sort: Highest Win Rate</option>
+        <option value="cases">Sort: Most Cases</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Results grid -->
+  <div class="results-wrap">
+    <div class="lawyer-grid" id="lawyerGrid"></div>
+    <div class="no-results" id="noResults" style="display:none">
+      <div class="nr-icon">🔍</div>
+      <h3>No attorneys match your filters</h3>
+      <p style="font-size:13px;margin-top:6px">Try adjusting your search criteria or clearing filters.</p>
+      <button class="nav-btn gold" style="margin:16px auto 0;display:flex" onclick="clearFilters()">Clear all filters</button>
+    </div>
+  </div>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE 2: LAWYER PROFILE
+════════════════════════════════════════ -->
+<div class="page" id="page-profile">
+  <!-- Hero -->
+  <div class="profile-hero">
+    <div class="ph-inner">
+      <div class="ph-top">
+        <div class="ph-avatar" id="profileAvatar" style="background:var(--navy4)">BB</div>
+        <div class="ph-info">
+          <div class="ph-cert-badge">✓ Board Certified — Business Litigation</div>
+          <h1 class="ph-name" id="profileName">Brian F. Barakat, Esq.</h1>
+          <p class="ph-firm" id="profileFirm">Founding & Managing Partner · Barakat + Bossa, PLLC · Coral Gables, FL</p>
+          <div class="ph-badges">
+            <span class="ph-badge star">Chambers USA Ranked</span>
+            <span class="ph-badge star">Legal 500 Listed</span>
+            <span class="ph-badge">FL Bar</span>
+            <span class="ph-badge">NY Bar</span>
+            <span class="ph-badge">SCOTUS Admitted</span>
+            <span class="ph-badge">25 yrs Experience</span>
+          </div>
+        </div>
+        <div class="ph-actions">
+          <button class="nav-btn gold" onclick="showToast('Opening contact form...')">Contact Attorney</button>
+          <button class="nav-btn" onclick="showToast('Saved to watchlist')">♡ Save</button>
+        </div>
+      </div>
+    </div>
+    <div class="ph-kpi-row">
+      <div class="ph-kpi"><div class="ph-kpi-val a" id="pkWin">97%</div><div class="ph-kpi-lbl">Win Rate</div></div>
+      <div class="ph-kpi"><div class="ph-kpi-val w" id="pkCases">1,500+</div><div class="ph-kpi-lbl">Cases Handled</div></div>
+      <div class="ph-kpi"><div class="ph-kpi-val g" id="pkWon">1,450+</div><div class="ph-kpi-lbl">Cases Won</div></div>
+      <div class="ph-kpi"><div class="ph-kpi-val b" id="pkRec">$50M+</div><div class="ph-kpi-lbl">Recovered</div></div>
+      <div class="ph-kpi"><div class="ph-kpi-val w" id="pkRating">5.0 ★</div><div class="ph-kpi-lbl">Martindale Rating</div></div>
+    </div>
+  </div>
+
+  <div class="profile-body">
+    <div>
+      <!-- Pro mode bar -->
+      <div class="pro-badge-bar">
+        <span class="pro-icon">⚡</span>
+        <div class="pro-text">
+          <div class="pro-title">Pro Intelligence Mode</div>
+          <div class="pro-sub">Unlock opponent analytics, judge patterns & motion history</div>
+        </div>
+        <button class="pro-toggle" id="proToggle" onclick="togglePro()">Unlock Pro View</button>
+      </div>
+
+      <!-- Pro KPIs (hidden by default) -->
+      <div id="proSection" style="display:none">
+        <div class="pro-kpi-grid">
+          <div class="pro-kpi"><div class="pro-kpi-val">84%</div><div class="pro-kpi-lbl">Jury Trial Win %</div></div>
+          <div class="pro-kpi"><div class="pro-kpi-val">$2.1M</div><div class="pro-kpi-lbl">Avg. Settlement</div></div>
+          <div class="pro-kpi"><div class="pro-kpi-val">12</div><div class="pro-kpi-lbl">Active Cases</div></div>
+          <div class="pro-kpi"><div class="pro-kpi-val">92%</div><div class="pro-kpi-lbl">Brief Success</div></div>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd"><span class="card-icon">📊</span> Case Type Distribution (Pro)</div>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">Business Litigation</span><div class="bar-track"><div class="bar-fill" style="width:72%"></div></div><span class="bar-pct">72%</span></div>
+            <div class="bar-row"><span class="bar-label">Corporate / M&A</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-pct">55%</span></div>
+            <div class="bar-row"><span class="bar-label">Real Estate</span><div class="bar-track"><div class="bar-fill" style="width:38%"></div></div><span class="bar-pct">38%</span></div>
+            <div class="bar-row"><span class="bar-label">Employment</span><div class="bar-track"><div class="bar-fill" style="width:21%"></div></div><span class="bar-pct">21%</span></div>
+            <div class="bar-row"><span class="bar-label">Appellate</span><div class="bar-track"><div class="bar-fill" style="width:18%"></div></div><span class="bar-pct">18%</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd"><span class="card-icon">⚖️</span> Judge Frequency & Win Rate (Pro)</div>
+          <div style="overflow-x:auto">
+            <table class="judge-table">
+              <thead><tr><th>Judge</th><th>Court</th><th>Cases</th><th>Win Rate</th></tr></thead>
+              <tbody>
+                <tr><td>Hon. Cecilia Altonaga</td><td>S.D. Fla.</td><td>14</td><td><span class="win-rate-pill high">93%</span></td></tr>
+                <tr><td>Hon. Robert Scola</td><td>S.D. Fla.</td><td>11</td><td><span class="win-rate-pill high">91%</span></td></tr>
+                <tr><td>Hon. Jennifer Bailey</td><td>Miami-Dade Cir.</td><td>9</td><td><span class="win-rate-pill mid">78%</span></td></tr>
+                <tr><td>Hon. Norma Lindsey</td><td>Third DCA</td><td>6</td><td><span class="win-rate-pill high">100%</span></td></tr>
+                <tr><td>Hon. Ivan Fernandez</td><td>Third DCA</td><td>5</td><td><span class="win-rate-pill high">80%</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tabs-bar">
+        <button class="tab-btn active" onclick="switchTab(this,'overview')">Overview</button>
+        <button class="tab-btn" onclick="switchTab(this,'cases')">Cases</button>
+        <button class="tab-btn" onclick="switchTab(this,'performance')">Performance</button>
+        <button class="tab-btn" onclick="switchTab(this,'conduct')">Conduct</button>
+        <button class="tab-btn" onclick="switchTab(this,'style')">Trial Style</button>
+        <button class="tab-btn" onclick="switchTab(this,'reviews')">Reviews</button>
+      </div>
+
+      <!-- Overview tab -->
+      <div class="tab-panel active" id="tab-overview">
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd"><span class="card-icon">👤</span> Biography</div>
+          <p class="summary-text">Brian F. Barakat is the founding and managing partner of Barakat + Bossa, PLLC, a boutique litigation powerhouse based in Coral Gables, Florida. With over 25 years of trial and appellate experience, Barakat has built a career defined by high-stakes business disputes, corporate litigation, and complex appellate reversals.</p>
+          <p class="summary-text" style="margin-top:.75rem">Born in Miami, FL to a family with roots in Lebanon and Spain, Barakat is married to the Honorable Michelle Alvarez Barakat, Circuit Court Judge, Miami-Dade County. He is a father of three and an avid collector of rare legal texts. Outside the courtroom, he serves on the Florida Bar Business Law Section and the Coral Gables Chamber of Commerce.</p>
+        </div>
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd"><span class="card-icon">⚖️</span> Trial Style & Approach</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:var(--cream);border-radius:var(--r);padding:12px">
+              <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">🎯 Approach</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.6">Surgical, evidence-first litigation strategy. Barakat leads with procedural mastery and forensic accounting to dismantle opposing damages claims before trial begins.</div>
+            </div>
+            <div style="background:var(--cream);border-radius:var(--r);padding:12px">
+              <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">🔬 Forensic Expertise</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.6">Known for arithmetical validation of unliquidated damages — a specialty that has produced multiple appellate reversals where trial courts failed to apply mandatory evidentiary standards.</div>
+            </div>
+            <div style="background:var(--cream);border-radius:var(--r);padding:12px">
+              <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">🎙 Cross-Examination</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.6">Methodical and controlled. Barakat rarely raises his voice — he builds a logical cage around opposing witnesses using their own prior statements and documents.</div>
+            </div>
+            <div style="background:var(--cream);border-radius:var(--r);padding:12px">
+              <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:5px">🏛 Peer Reputation</div>
+              <div style="font-size:12px;color:var(--text2);line-height:1.6">Rated AV Preeminent by Martindale-Hubbell. Peers describe him as "the attorney you don't want to face on appeal" and "one of the most prepared litigators in South Florida."</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-icon">🏛</span> Bar Admissions & Courts</div>
+          <div>
+            <div class="info-row"><span class="info-key">Florida Bar</span><span class="info-val mono">Admitted 1999 · Active</span></div>
+            <div class="info-row"><span class="info-key">New York Bar</span><span class="info-val mono">Admitted 2001 · Active</span></div>
+            <div class="info-row"><span class="info-key">U.S. District Court — S.D. Fla.</span><span class="info-val mono">Admitted · Active</span></div>
+            <div class="info-row"><span class="info-key">U.S. District Court — M.D. Fla.</span><span class="info-val mono">Admitted · Active</span></div>
+            <div class="info-row"><span class="info-key">U.S. Court of Appeals — 11th Cir.</span><span class="info-val mono">Admitted · Active</span></div>
+            <div class="info-row"><span class="info-key">U.S. Supreme Court</span><span class="info-val mono green">Admitted · Active</span></div>
+            <div class="info-row"><span class="info-key">U.S. Tax Court</span><span class="info-val mono">Admitted · Active</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cases tab -->
+      <div class="tab-panel" id="tab-cases">
+        <div class="card">
+          <div class="card-hd"><span class="card-icon">📁</span> Case History</div>
+          <!-- Filter bar -->
+          <div class="cases-filter-bar">
+            <span style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em">Type:</span>
+            <div class="case-filter-chip active" onclick="filterCases(this,'all')">All</div>
+            <div class="case-filter-chip" onclick="filterCases(this,'commercial')">Commercial</div>
+            <div class="case-filter-chip" onclick="filterCases(this,'corporate')">Corporate</div>
+            <div class="case-filter-chip" onclick="filterCases(this,'employment')">Employment</div>
+            <div class="case-filter-chip" onclick="filterCases(this,'civil')">Civil / Appellate</div>
+            <select class="cases-filter-select" id="caseStatusFilter" onchange="filterCasesByStatus()">
+              <option value="all">All Statuses</option>
+              <option value="won">Won</option>
+              <option value="lost">Lost</option>
+              <option value="active">Active</option>
+              <option value="settled">Settled</option>
+            </select>
+          </div>
+          <div id="casesList"></div>
+        </div>
+      </div>
+
+      <!-- Performance tab -->
+      <div class="tab-panel" id="tab-performance">
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd"><span class="card-icon">📊</span> Win/Loss Record</div>
+          <div class="perf-grid">
+            <div class="perf-box"><div class="perf-val g">1,455</div><div class="perf-lbl">Cases Won</div></div>
+            <div class="perf-box"><div class="perf-val r">45</div><div class="perf-lbl">Cases Lost</div></div>
+            <div class="perf-box"><div class="perf-val a">97%</div><div class="perf-lbl">Win Rate</div></div>
+            <div class="perf-box"><div class="perf-val b">$50M+</div><div class="perf-lbl">Total Recovered</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-icon">⚡</span> Active Caseload</div>
+          <div class="bar-chart">
+            <div class="bar-row"><span class="bar-label">Business Lit.</span><div class="bar-track"><div class="bar-fill" style="width:65%"></div></div><span class="bar-pct">7 cases</span></div>
+            <div class="bar-row"><span class="bar-label">Appellate</span><div class="bar-track"><div class="bar-fill" style="width:30%"></div></div><span class="bar-pct">3 cases</span></div>
+            <div class="bar-row"><span class="bar-label">Corporate</span><div class="bar-track"><div class="bar-fill" style="width:20%"></div></div><span class="bar-pct">2 cases</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conduct tab -->
+      <div class="tab-panel" id="tab-conduct">
+        <div class="card">
+          <div class="card-hd"><span class="card-icon">🛡</span> Conduct & Background Checks</div>
+          <div class="conduct-grid">
+            <div class="conduct-item"><span class="conduct-icon">✅</span><div><div class="conduct-title">Criminal Record — CLEARED</div><div class="conduct-sub">No criminal history</div></div></div>
+            <div class="conduct-item"><span class="conduct-icon">✅</span><div><div class="conduct-title">Florida Bar — CLEARED</div><div class="conduct-sub">No disciplinary actions</div></div></div>
+            <div class="conduct-item"><span class="conduct-icon">✅</span><div><div class="conduct-title">New York Bar — CLEARED</div><div class="conduct-sub">No disciplinary actions</div></div></div>
+            <div class="conduct-item"><span class="conduct-icon">✅</span><div><div class="conduct-title">Federal Courts — CLEARED</div><div class="conduct-sub">Good standing in all courts</div></div></div>
+          </div>
+          <div style="background:var(--cream);border-radius:var(--r);padding:12px;margin-top:12px;font-size:13px;color:var(--text2);line-height:1.7">
+            Brian F. Barakat has maintained an unblemished disciplinary record across all bar associations and court admissions for over 25 years of practice. Last verified: January 2026.
+          </div>
+        </div>
+      </div>
+
+      <!-- Trial Style tab -->
+      <div class="tab-panel" id="tab-style">
+        <div class="card">
+          <div class="card-hd"><span class="card-icon">🎯</span> Trial Style Intelligence</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:var(--navy);border-radius:var(--rlg);padding:14px"><div style="font-size:12px;font-weight:700;color:var(--gold2);margin-bottom:6px">Overall Approach</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.65">Analytical and methodical — builds irrefutable logical chains through documentary evidence before introducing witness testimony. Known for pre-trial motions that often resolve cases entirely.</div></div>
+            <div style="background:var(--navy);border-radius:var(--rlg);padding:14px"><div style="font-size:12px;font-weight:700;color:var(--gold2);margin-bottom:6px">Cross-Examination Style</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.65">Controlled, Socratic questioning. Uses prior depositions and financial records to create contradictions. Rarely confrontational — prefers to let the evidence speak.</div></div>
+            <div style="background:var(--navy);border-radius:var(--rlg);padding:14px"><div style="font-size:12px;font-weight:700;color:var(--gold2);margin-bottom:6px">Forensic Specialty</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.65">Unliquidated damages arithmetic validation. Has produced 4 appellate reversals where trial courts failed to apply Florida's mandatory evidentiary standard for default damage judgments.</div></div>
+            <div style="background:var(--navy);border-radius:var(--rlg);padding:14px"><div style="font-size:12px;font-weight:700;color:var(--gold2);margin-bottom:6px">Peer Reputation</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.65">"The attorney you don't want to face on appeal." South Florida peers describe Barakat as one of the most prepared litigators in the region — meticulous, relentless, unflappable.</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews tab -->
+      <div class="tab-panel" id="tab-reviews">
+        <div class="card" style="margin-bottom:1rem">
+          <div class="card-hd"><span class="card-icon">⭐</span> Martindale-Hubbell Rating</div>
+          <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap">
+            <div><div class="review-stars-big">5.0</div><div class="review-stars-row">★★★★★</div><div class="review-source">Martindale-Hubbell Peer Review Rating</div></div>
+            <div style="flex:1;min-width:200px">
+              <div class="review-quote">"Brian Barakat is one of the most prepared and formidable litigators I have encountered in 30 years of practice. His appellate instincts are second to none."<div class="review-author">— Senior Partner, Miami-Dade litigation firm</div></div>
+              <div class="review-quote" style="margin-top:8px">"The level of analytical rigor Barakat brings to complex business disputes is exceptional. He anticipates appellate issues from day one of litigation."<div class="review-author">— Florida Bar Business Law peer reviewer</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hd"><span class="card-icon">🏆</span> Awards & Recognition</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px">
+            <div style="background:var(--gold-pale);border:1px solid rgba(200,150,30,.25);border-radius:var(--r);padding:11px;text-align:center"><div style="font-size:18px;margin-bottom:4px">🏆</div><div style="font-size:12px;font-weight:600;color:var(--amber)">Chambers USA Ranked</div><div style="font-size:11px;color:var(--text3)">Business Litigation, FL</div></div>
+            <div style="background:var(--gold-pale);border:1px solid rgba(200,150,30,.25);border-radius:var(--r);padding:11px;text-align:center"><div style="font-size:18px;margin-bottom:4px">⭐</div><div style="font-size:12px;font-weight:600;color:var(--amber)">Legal 500 Listed</div><div style="font-size:11px;color:var(--text3)">Commercial Disputes</div></div>
+            <div style="background:var(--gold-pale);border:1px solid rgba(200,150,30,.25);border-radius:var(--r);padding:11px;text-align:center"><div style="font-size:18px;margin-bottom:4px">🎖</div><div style="font-size:12px;font-weight:600;color:var(--amber)">Super Lawyers</div><div style="font-size:11px;color:var(--text3)">2018–2026</div></div>
+            <div style="background:var(--gold-pale);border:1px solid rgba(200,150,30,.25);border-radius:var(--r);padding:11px;text-align:center"><div style="font-size:18px;margin-bottom:4px">🏅</div><div style="font-size:12px;font-weight:600;color:var(--amber)">AV Preeminent</div><div style="font-size:11px;color:var(--text3)">Martindale-Hubbell</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile sidebar -->
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">📞</span> Contact</div>
+        <div><div class="info-row"><span class="info-key">Email</span><span class="info-val" style="color:var(--blue);cursor:pointer">barakat@b2b.legal</span></div>
+        <div class="info-row"><span class="info-key">Phone</span><span class="info-val mono">+1 (305) 444-3114</span></div>
+        <div class="info-row"><span class="info-key">Website</span><span class="info-val" style="color:var(--blue);cursor:pointer">b2b.legal</span></div>
+        <div class="info-row"><span class="info-key">Office</span><span class="info-val">Coral Gables, FL</span></div></div>
+        <button class="lc-action" style="width:100%;margin-top:12px;padding:10px;font-size:13px;border-radius:9px" onclick="showToast('Opening contact form...')">Send Message →</button>
+      </div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">📌</span> Quick Facts</div>
+        <div><div class="info-row"><span class="info-key">Licensed since</span><span class="info-val">1999</span></div>
+        <div class="info-row"><span class="info-key">Experience</span><span class="info-val">25+ years</span></div>
+        <div class="info-row"><span class="info-key">Primary practice</span><span class="info-val">Business Litigation</span></div>
+        <div class="info-row"><span class="info-key">Win rate</span><span class="info-val green">97%</span></div>
+        <div class="info-row"><span class="info-key">Board certified</span><span class="info-val green">Yes</span></div>
+        <div class="info-row"><span class="info-key">Fee structure</span><span class="info-val">Hourly + Contingency</span></div>
+        <div class="info-row"><span class="info-key">Availability</span><span class="info-val" style="display:flex;align-items:center;gap:5px;justify-content:flex-end"><span style="width:7px;height:7px;border-radius:50%;background:#22C55E;display:inline-block"></span>Available</span></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hd"><span class="card-icon">🏛</span> Community</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.8">
+          <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center"><span>🏛</span><span>Florida Bar Business Law Section Board Member</span></div>
+          <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center"><span>🤝</span><span>Coral Gables Chamber of Commerce — Legal Chair</span></div>
+          <div style="display:flex;gap:8px;align-items:center"><span>📚</span><span>Miami Law School Adjunct Lecturer — Appellate Practice</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ════════════════════════════════════════
+     PAGE 3: CASE DETAIL
+════════════════════════════════════════ -->
+<div class="page" id="page-case">
+  <div class="case-hero">
+    <div class="ch-inner">
+      <div class="case-number-tag" id="caseNumTag">Case No. 3D2025-0116</div>
+      <h1 class="case-title" id="caseTitle"><em>Trident Real Estate, Inc.</em><br>v. Sonny & Ricardo, LLC et al.</h1>
+      <p class="case-subtitle" id="caseCourt">District Court of Appeal of Florida, Third District · Commercial Real Estate Fraud / Procedural Due Process</p>
+      <div class="status-pills">
+        <span class="status-pill closed">⬤ Closed</span>
+        <span class="status-pill victory">✓ Appellate Victory</span>
+        <span class="status-pill appeal">🏛 Third DCA</span>
+        <span class="status-pill type" id="casePracticeTag">Commercial Real Estate</span>
+      </div>
+    </div>
+    <div class="case-kpi-row">
+      <div class="ckpi"><div class="ckpi-val g">WON</div><div class="ckpi-lbl">Final Outcome</div></div>
+      <div class="ckpi"><div class="ckpi-val a" id="ckClientParty">Defendant</div><div class="ckpi-lbl">Barakat's Client</div></div>
+      <div class="ckpi"><div class="ckpi-val b">1</div><div class="ckpi-lbl">Major Motion</div></div>
+      <div class="ckpi"><div class="ckpi-val w">6</div><div class="ckpi-lbl">Docket Events</div></div>
+      <div class="ckpi"><div class="ckpi-val g">100%</div><div class="ckpi-lbl">Appellate Success</div></div>
+    </div>
+  </div>
+
+  <div class="case-body">
+    <div>
+      <!-- Summary -->
+      <div class="card fade-up" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">📋</span> Case Summary</div>
+        <p class="summary-text">Barakat's client — the defendant and appellant — faced a default final judgment entered without valid service of process and containing arithmetically unvalidated damages in a commercial real estate fraud dispute. The plaintiff obtained the default at the trial level while Barakat's client was unaware of the proceedings due to defective service.</p>
+        <p class="summary-text" style="margin-top:.75rem">Barakat filed an Emergency Motion to Set Aside Default Final Judgment demonstrating a complete lack of valid service and errors in the unliquidated damage calculations. The lower court denied the motion. Barakat immediately invoked appellate jurisdiction before the Third District Court of Appeal. After a comprehensive omnibus brief and live oral argument, the Third DCA issued a full written reversal — completely vacating the default judgment and restoring the client's right to defend.</p>
+        <div class="key-finding"><strong>Key finding:</strong> The Third DCA found the trial court violated civil procedure rules governing valid service of process and the mandatory arithmetical validation required before entry of an unliquidated default judgment. The order was vacated in its entirety.</div>
+      </div>
+
+      <!-- Parties -->
+      <div class="card fade-up" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">⚖️</span> Parties</div>
+        <div class="parties-grid">
+          <div class="party-box">
+            <div class="party-role">Plaintiff / Appellee</div>
+            <div class="party-name">Trident Real Estate, Inc.</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">Opposing counsel</div>
+            <span class="party-status lost">LOST ON APPEAL</span>
+          </div>
+          <div class="vs-circle">VS</div>
+          <div class="party-box winner">
+            <div class="party-role">Defendant / Appellant ✓</div>
+            <div class="party-name">Sonny & Ricardo, LLC et al.</div>
+            <div style="font-size:11px;color:var(--blue);cursor:pointer;margin-top:3px" onclick="goTo('profile')">Brian F. Barakat, Esq.</div>
+            <span class="party-status won">WON — FULL REVERSAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="card fade-up" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">🗓</span> Chronological Docket History</div>
+        <div class="timeline" id="caseTimeline">
+
+          <div class="tl-item" data-d="0">
+            <div class="tl-dot-col"><div class="tl-dot initiated"></div></div>
+            <div class="tl-content">
+              <div class="tl-date-row"><span class="tl-date">May 12, 2024</span><span class="tl-badge initiated">Initiated</span></div>
+              <div class="tl-event-title">Emergency Motion to Set Aside Default Final Judgment</div>
+              <div class="tl-action">Barakat files an intensive evidentiary motion demonstrating a complete lack of valid service of process and unliquidated damage calculation errors present in the trial court's default judgment.</div>
+              <div class="tl-context">An emergency motion requests the court to act immediately — the client faced imminent risk of bank account execution. This was the first defensive strike of the case.</div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-d="1">
+            <div class="tl-dot-col"><div class="tl-dot denied"></div></div>
+            <div class="tl-content">
+              <div class="tl-date-row"><span class="tl-date">August 19, 2024</span><span class="tl-badge denied">Denied — Trial Level (0%)</span></div>
+              <div class="tl-event-title">Order Denying Defendant's Motion to Set Aside Default</div>
+              <div class="tl-action">The lower circuit court judge signs an order denying the defensive emergency filing, upholding the default judgment despite Barakat's service and damages arguments.</div>
+              <div class="tl-context denied">A denial at the trial level immediately triggered Barakat's appellate strategy — invoking the Third DCA's jurisdiction to freeze potential bank execution attempts while the appeal proceeded.</div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-d="2">
+            <div class="tl-dot-col"><div class="tl-dot procedural"></div></div>
+            <div class="tl-content">
+              <div class="tl-date-row"><span class="tl-date">January 15, 2025</span><span class="tl-badge procedural">Procedural Step</span></div>
+              <div class="tl-event-title">Notice of Appeal Filed</div>
+              <div class="tl-action">The appellate track is formally activated with the Third DCA clerk, invoking appellate jurisdiction and creating an automatic stay to freeze potential execution attempts on the client's corporate bank accounts.</div>
+              <div class="tl-context">Filing a Notice of Appeal starts the appellate process and — critically — creates an automatic stay preventing the plaintiff from collecting or executing on the default judgment during the appeal.</div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-d="3">
+            <div class="tl-dot-col"><div class="tl-dot brief"></div></div>
+            <div class="tl-content">
+              <div class="tl-date-row"><span class="tl-date">April 22, 2025</span><span class="tl-badge brief">Appellate Brief</span></div>
+              <div class="tl-event-title">Appellant's Main Omnibus Brief Filed</div>
+              <div class="tl-action">Barakat's appellate team submits their primary brief, introducing comprehensive jurisdictional authority showing the trial court violated clearly established civil procedure rules governing service of process and default judgment entry for unliquidated damages.</div>
+              <div class="tl-context">An "omnibus brief" raises every available legal argument in a single comprehensive document — the primary vehicle for persuading the three-judge panel that the trial court committed reversible error.</div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-d="4">
+            <div class="tl-dot-col"><div class="tl-dot oral"></div></div>
+            <div class="tl-content">
+              <div class="tl-date-row"><span class="tl-date">November 5, 2025</span><span class="tl-badge oral">Oral Argument</span></div>
+              <div class="tl-event-title">Oral Arguments Executed Before Three-Judge Panel</div>
+              <div class="tl-action">Barakat appears live before a three-judge appellate panel at the Third DCA, focusing on the lack of arithmetical validation for the alleged fraud damages and foundational service of process defects.</div>
+              <div class="tl-context">Oral argument is granted in only a fraction of appellate cases. Scheduling oral argument signals the panel found the legal issues significant enough to require direct attorney presentation and judge questioning.</div>
+            </div>
+          </div>
+
+          <div class="tl-item" data-d="5">
+            <div class="tl-dot-col"><div class="tl-dot victory"></div></div>
+            <div class="tl-content">
+              <div class="tl-date-row"><span class="tl-date">January 8, 2026</span><span class="tl-badge victory">✓ Granted on Appeal — Full Victory (100%)</span></div>
+              <div class="tl-event-title">Mandate & Reversal Opinion Signed — Complete Appellate Victory</div>
+              <div class="tl-action">Full appellate victory. The Third DCA issues a written opinion completely vacating the lower court default judgment in its entirety, restoring the client's right to defend the case on the merits.</div>
+              <div class="tl-context victory">This is the highest possible appellate outcome: a full reversal with a written opinion. The mandate requires immediate compliance. The client's corporate bank accounts are no longer at risk of execution. The case is remanded for a full hearing on the merits.</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Motion tracker -->
+      <div class="card fade-up" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">📊</span> Motion Tracker</div>
+        <div class="rate-grid">
+          <div class="rate-box fail"><div class="rate-box-label">Trial Court Result</div><div class="rate-box-val">0%</div><div class="rate-box-sub">Motion denied at circuit level</div></div>
+          <div class="rate-box win"><div class="rate-box-label">Appellate Result</div><div class="rate-box-val">100%</div><div class="rate-box-sub">Full reversal on appeal</div></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="motion-table">
+            <thead><tr><th style="width:42%">Motion / Action</th><th>Court</th><th>Filed</th><th>Result</th></tr></thead>
+            <tbody>
+              <tr><td><div style="font-size:13px;font-weight:500;color:var(--text)">Emergency Motion to Set Aside Default Judgment</div><div style="font-size:11px;color:var(--text3)">Service defects + damage errors</div></td><td style="font-size:12px;color:var(--text3)">Circuit Court</td><td style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">May 12, 2024</td><td><span class="motion-result denied">Denied</span></td></tr>
+              <tr><td><div style="font-size:13px;font-weight:500;color:var(--text)">Notice of Appeal + Automatic Stay</div><div style="font-size:11px;color:var(--text3)">Freezes execution on accounts</div></td><td style="font-size:12px;color:var(--text3)">Third DCA</td><td style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">Jan 15, 2025</td><td><span class="motion-result accepted">Accepted</span></td></tr>
+              <tr><td><div style="font-size:13px;font-weight:500;color:var(--text)">Appellant's Omnibus Brief</div><div style="font-size:11px;color:var(--text3)">Service of process + damages authority</div></td><td style="font-size:12px;color:var(--text3)">Third DCA</td><td style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">Apr 22, 2025</td><td><span class="motion-result filed">Brief Filed</span></td></tr>
+              <tr><td><div style="font-size:13px;font-weight:500;color:var(--text)">Oral Argument — Three-Judge Panel</div><div style="font-size:11px;color:var(--text3)">Live presentation on damages validation failure</div></td><td style="font-size:12px;color:var(--text3)">Third DCA</td><td style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">Nov 5, 2025</td><td><span class="motion-result argued">Argued</span></td></tr>
+              <tr><td><div style="font-size:13px;font-weight:500;color:var(--text)">Mandate & Written Reversal Opinion</div><div style="font-size:11px;color:var(--text3)">Default judgment vacated in entirety</div></td><td style="font-size:12px;color:var(--text3)">Third DCA</td><td style="font-size:11px;font-family:'DM Mono',monospace;color:var(--text3)">Jan 8, 2026</td><td><span class="motion-result granted">✓ Full Reversal</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Legal Issues -->
+      <div class="card fade-up" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">⚖️</span> Core Legal Issues</div>
+        <div class="issue-item"><div class="issue-num">1</div><div><div class="issue-title">Defective Service of Process</div><div class="issue-desc">The defendant-appellant was never validly served. The plaintiff obtained a default judgment without constitutionally adequate service — a foundational requirement before any court can exercise jurisdiction over a defendant.</div></div></div>
+        <div class="issue-item"><div class="issue-num">2</div><div><div class="issue-title">Unliquidated Damages — Mandatory Arithmetical Validation</div><div class="issue-desc">Florida law requires that when a plaintiff seeks an unliquidated damages default judgment, the trial court must hold an evidentiary hearing and apply arithmetical validation. No such validation occurred here.</div></div></div>
+        <div class="issue-item"><div class="issue-num">3</div><div><div class="issue-title">Procedural Due Process — Right to be Heard</div><div class="issue-desc">The Fourteenth Amendment guarantees every party notice and an opportunity to be heard before judgment. The combined service and damages procedure violations constituted a fundamental due process violation compelling reversal.</div></div></div>
+      </div>
+
+      <!-- Documents -->
+      <div class="card fade-up">
+        <div class="card-hd"><span class="card-icon">📄</span> Court Documents on Record</div>
+        <div>
+          <div class="doc-item" onclick="showToast('Opening: Emergency Motion to Set Aside')"><div class="doc-icon motion">📋</div><div style="flex:1;min-width:0"><div class="doc-name">Emergency Motion to Set Aside Default Final Judgment</div><div class="doc-date">Filed May 12, 2024 · Circuit Court</div></div><span class="doc-type motion">Motion</span></div>
+          <div class="doc-item" onclick="showToast('Opening: Order Denying Motion')"><div class="doc-icon order">📜</div><div style="flex:1;min-width:0"><div class="doc-name">Order Denying Defendant's Motion to Set Aside Default</div><div class="doc-date">Signed August 19, 2024 · Circuit Court</div></div><span class="doc-type order">Order</span></div>
+          <div class="doc-item" onclick="showToast('Opening: Notice of Appeal')"><div class="doc-icon procedural">🔔</div><div style="flex:1;min-width:0"><div class="doc-name">Notice of Appeal — Third District Court of Appeal</div><div class="doc-date">Filed January 15, 2025 · Third DCA</div></div><span class="doc-type procedural">Procedural</span></div>
+          <div class="doc-item" onclick="showToast('Opening: Omnibus Brief')"><div class="doc-icon brief">📑</div><div style="flex:1;min-width:0"><div class="doc-name">Appellant's Main Omnibus Brief</div><div class="doc-date">Filed April 22, 2025 · Third DCA</div></div><span class="doc-type brief">Brief</span></div>
+          <div class="doc-item" onclick="showToast('Opening: Oral Argument Transcript')"><div class="doc-icon procedural">🎙</div><div style="flex:1;min-width:0"><div class="doc-name">Oral Argument Transcript — Three-Judge Panel</div><div class="doc-date">November 5, 2025 · Third DCA Courtroom</div></div><span class="doc-type procedural">Transcript</span></div>
+          <div class="doc-item" onclick="showToast('Opening: Mandate & Reversal Opinion')"><div class="doc-icon judgment">✅</div><div style="flex:1;min-width:0"><div class="doc-name">Mandate & Written Reversal Opinion — Default Vacated</div><div class="doc-date">Issued January 8, 2026 · Third DCA</div></div><span class="doc-type judgment">Judgment</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case sidebar -->
+    <div>
+      <div class="verdict-box" style="margin-bottom:1rem">
+        <div class="verdict-icon">🏆</div>
+        <div class="verdict-title">Full Appellate Victory</div>
+        <div class="verdict-sub">Third DCA issued a written reversal opinion completely vacating the lower court default judgment. Client's right to defend was fully restored.</div>
+        <div class="verdict-pill">BARAKAT'S CLIENT WON</div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">📌</span> Case Details</div>
+        <div>
+          <div class="info-row"><span class="info-key">Case number</span><span class="info-val mono">3D2025-0116</span></div>
+          <div class="info-row"><span class="info-key">Court</span><span class="info-val">Third DCA · Florida</span></div>
+          <div class="info-row"><span class="info-key">Case type</span><span class="info-val">Commercial Real Estate Fraud</span></div>
+          <div class="info-row"><span class="info-key">Status</span><span class="info-val">Closed</span></div>
+          <div class="info-row"><span class="info-key">Outcome</span><span class="info-val green">Full reversal — defendant wins</span></div>
+          <div class="info-row"><span class="info-key">Trial success</span><span class="info-val" style="color:var(--red)">0% — denied</span></div>
+          <div class="info-row"><span class="info-key">Appellate success</span><span class="info-val green">100% — reversed</span></div>
+          <div class="info-row"><span class="info-key">Case opened</span><span class="info-val mono">May 12, 2024</span></div>
+          <div class="info-row"><span class="info-key">Case closed</span><span class="info-val mono">January 8, 2026</span></div>
+          <div class="info-row"><span class="info-key">Duration</span><span class="info-val">~20 months</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">👤</span> Attorney of Record</div>
+        <div class="atty-card-dark" onclick="goTo('profile')">
+          <div class="atty-top"><div class="atty-av">BB</div><div><div class="atty-name">Brian F. Barakat, Esq.</div><div class="atty-firm">Barakat + Bossa, PLLC · Coral Gables, FL</div></div></div>
+          <div class="atty-stats">
+            <div class="atty-stat"><div class="atty-stat-val a">97%</div><div class="atty-stat-lbl">Win Rate</div></div>
+            <div class="atty-stat"><div class="atty-stat-val g">1,450+</div><div class="atty-stat-lbl">Cases Won</div></div>
+            <div class="atty-stat"><div class="atty-stat-val" style="color:#93B8F8">25 yrs</div><div class="atty-stat-lbl">Experience</div></div>
+          </div>
+        </div>
+        <button class="lc-action" style="width:100%;margin-top:10px;padding:10px;font-size:13px;border-radius:9px" onclick="goTo('profile')">View full profile →</button>
+      </div>
+
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-hd"><span class="card-icon">🔮</span> What Happens Next</div>
+        <div>
+          <div class="ns-item"><span class="ns-icon">📋</span><div><div class="ns-title">Case remanded for full merits hearing</div><div class="ns-desc">The default was vacated. Case remanded to circuit court for defendant to present a full defense on the merits.</div></div></div>
+          <div class="ns-item"><span class="ns-icon">🏦</span><div><div class="ns-title">Corporate bank accounts released</div><div class="ns-desc">The reversal permanently eliminated the plaintiff's ability to execute on the client's corporate accounts.</div></div></div>
+          <div class="ns-item"><span class="ns-icon">📝</span><div><div class="ns-title">Plaintiff must re-litigate properly</div><div class="ns-desc">Trident Real Estate must now properly serve the defendant and pursue claims through regular trial with full defense participation.</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-hd"><span class="card-icon">📁</span> More Cases by Barakat</div>
+        <div>
+          <div class="rc-item" onclick="showToast('Loading case...')"><div class="rc-dot won"></div><div class="rc-name">MegaCorp v. Rival Industries — Trade Secret</div><span class="rc-tag won">Won</span></div>
+          <div class="rc-item" onclick="showToast('Loading case...')"><div class="rc-dot won"></div><div class="rc-name">Business Separation — LLC Dissolution</div><span class="rc-tag won">Won</span></div>
+          <div class="rc-item" onclick="showToast('Loading case...')"><div class="rc-dot active"></div><div class="rc-name">Factoring Agreement Dispute — Federal</div><span class="rc-tag active">Active</span></div>
+          <div class="rc-item" onclick="showToast('Loading case...')"><div class="rc-dot won"></div><div class="rc-name">Non-Compete Enforcement — Tech Firm</div><span class="rc-tag won">Won</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ════════════════════════════════════════ JAVASCRIPT ════ -->
+<script>
+// ══════ DATA ══════
+const LAWYERS = [
+  {id:'barakat',name:'Brian F. Barakat, Esq.',title:'Founding Partner · Barakat + Bossa, PLLC',city:'Coral Gables',state:'FL',practice:['Business Litigation','Corporate Law','Real Estate'],rating:5.0,cases:1500,won:1455,winRate:97,exp:25,fee:'$450/hr',availability:'available',certified:true,color:'#1E3A54',initials:'BB',
+    caseList:[
+      {id:'trident',name:'Trident Real Estate v. Sonny & Ricardo LLC',court:'Third DCA · FL',year:2026,type:'commercial',status:'won',typeLabel:'Commercial'},
+      {name:'MegaCorp v. Rival Industries (Trade Secret)',court:'S.D. Fla.',year:2024,type:'corporate',status:'won',typeLabel:'Corporate'},
+      {name:'Apex Corp. v. Former Executive',court:'Miami-Dade Cir.',year:2023,type:'employment',status:'settled',typeLabel:'Employment'},
+      {name:'Rivera Industries v. Global Distribution',court:'S.D. Fla.',year:2024,type:'corporate',status:'active',typeLabel:'Corporate'},
+      {name:'Non-Compete Enforcement — Tech Firm',court:'M.D. Fla.',year:2022,type:'civil',status:'won',typeLabel:'Civil'},
+      {name:'Factoring Agreement Dispute — Federal',court:'S.D. Fla.',year:2025,type:'commercial',status:'active',typeLabel:'Commercial'},
+    ]
+  },
+  {id:'pierce',name:'Jonathan R. Pierce, Esq.',title:'Senior Partner · Pierce & Associates',city:'Los Angeles',state:'CA',practice:['Personal Injury','Civil Rights'],rating:4.9,cases:820,won:762,winRate:93,exp:18,fee:'Contingency',availability:'available',certified:false,color:'#7C3AED',initials:'JP',caseList:[
+    {name:'Martinez v. Pacific Health Systems',court:'C.D. Cal.',year:2024,type:'civil',status:'won',typeLabel:'Civil'},
+    {name:'Johnson v. City of LA — Police Misconduct',court:'9th Cir.',year:2023,type:'civil',status:'won',typeLabel:'Civil'},
+    {name:'Reyes v. Construction Co. — Workplace Injury',court:'LA Superior',year:2025,type:'commercial',status:'active',typeLabel:'Commercial'},
+  ]},
+  {id:'thornton',name:'Rebecca A. Thornton, Esq.',title:'Partner · Whitmore & Thornton LLP',city:'New York',state:'NY',practice:['Corporate Law','Employment'],rating:4.9,cases:650,won:598,winRate:92,exp:22,fee:'$600/hr',availability:'busy',certified:true,color:'#065F46',initials:'RT',caseList:[
+    {name:'Nexus Capital Merger — SEC Review',court:'S.D.N.Y.',year:2024,type:'corporate',status:'won',typeLabel:'Corporate'},
+    {name:'Executive Employment Agreement Dispute',court:'NY Supreme',year:2023,type:'employment',status:'settled',typeLabel:'Employment'},
+    {name:'Horizon Tech Acquisition Defense',court:'Delaware Chancery',year:2025,type:'corporate',status:'active',typeLabel:'Corporate'},
+  ]},
+  {id:'washington',name:'Marcus D. Washington, Esq.',title:'Founding Partner · Washington Defense Group',city:'Houston',state:'TX',practice:['Criminal Defense'],rating:4.8,cases:1100,won:990,winRate:90,exp:20,fee:'$350/hr',availability:'available',certified:false,color:'#92400E',initials:'MW',caseList:[
+    {name:'US v. Williams — Drug Conspiracy (Wiretap Suppressed)',court:'S.D. Tex.',year:2023,type:'civil',status:'won',typeLabel:'Civil / Criminal'},
+    {name:'State v. Johnson — White Collar Fraud',court:'Harris Co. Dist.',year:2024,type:'commercial',status:'won',typeLabel:'Commercial'},
+    {name:'Federal Securities Fraud Defense — Active',court:'5th Cir.',year:2025,type:'commercial',status:'active',typeLabel:'Commercial'},
+  ]},
+  {id:'navarro',name:'Sophia L. Navarro, Esq.',title:'Partner · Navarro Family Law Center',city:'Miami',state:'FL',practice:['Family Law'],rating:4.8,cases:430,won:385,winRate:90,exp:14,fee:'$320/hr',availability:'available',certified:true,color:'#9D174D',initials:'SN',caseList:[
+    {name:'High-Asset Divorce — Luiz & Diana Montoya',court:'Miami-Dade Cir.',year:2024,type:'civil',status:'won',typeLabel:'Civil'},
+    {name:'Child Custody Modification — Smith',court:'Broward Cir.',year:2023,type:'civil',status:'won',typeLabel:'Civil'},
+    {name:'International Child Abduction — Hague Convention',court:'S.D. Fla.',year:2025,type:'civil',status:'active',typeLabel:'Civil'},
+  ]},
+  {id:'williams',name:'Aisha K. Williams, Esq.',title:'Principal Attorney · Williams Civil Rights Law',city:'Washington',state:'DC',practice:['Civil Rights','Employment'],rating:4.9,cases:340,won:312,winRate:92,exp:16,fee:'Contingency',availability:'busy',certified:false,color:'#1D4ED8',initials:'AW',caseList:[
+    {name:'Thompson v. Metro Police — Excessive Force',court:'D.D.C.',year:2024,type:'civil',status:'won',typeLabel:'Civil'},
+    {name:'EEOC v. TechCorp — Systemic Discrimination',court:'D.C. Cir.',year:2023,type:'employment',status:'won',typeLabel:'Employment'},
+    {name:'Voting Rights Challenge — State Redistricting',court:'D.D.C.',year:2025,type:'civil',status:'active',typeLabel:'Civil'},
+  ]},
+  {id:'caldwell',name:'Ethan J. Caldwell, Esq.',title:'Managing Attorney · Caldwell Immigration',city:'Chicago',state:'IL',practice:['Immigration'],rating:4.7,cases:780,won:694,winRate:89,exp:12,fee:'$280/hr',availability:'available',certified:false,color:'#0F766E',initials:'EC',caseList:[
+    {name:'Asylum Grant — Venezuelan National',court:'Chicago Immigration',year:2024,type:'civil',status:'won',typeLabel:'Civil'},
+    {name:'EB-2 NIW Petition — Medical Researcher',court:'USCIS Appeals',year:2023,type:'civil',status:'won',typeLabel:'Civil'},
+    {name:'Deportation Defense — Family of 6',court:'7th Cir.',year:2025,type:'civil',status:'active',typeLabel:'Civil'},
+  ]},
+  {id:'menon',name:'Dr. Priya Menon, Esq.',title:'Partner · Menon & Associates Tax Law',city:'San Francisco',state:'CA',practice:['Tax Law','Corporate Law'],rating:4.8,cases:290,won:269,winRate:93,exp:19,fee:'$520/hr',availability:'available',certified:true,color:'#6B21A8',initials:'PM',caseList:[
+    {name:'IRS Dispute — Tech Founder $8M Assessment',court:'U.S. Tax Court',year:2024,type:'commercial',status:'won',typeLabel:'Commercial'},
+    {name:'International Transfer Pricing Defense',court:'9th Cir.',year:2023,type:'commercial',status:'won',typeLabel:'Commercial'},
+    {name:'SPAC Tax Structuring — Biotech Acquisition',court:'SEC / IRS',year:2025,type:'corporate',status:'active',typeLabel:'Corporate'},
+  ]},
+];
+
+let activeFilters={practice:'',status:'all',cert:'',rating:0,exp:0,win:0,avail:'',search:'',city:''};
+let proModeOn=false;
+let currentCaseType='all';
+let currentCaseStatus='all';
+
+// ══════ AUTH STATE ══════
+let currentUser = null;
+
+function openModal(tab){
+  document.getElementById('loginModal').classList.add('open');
+  const tabs = document.querySelectorAll('.modal-tab');
+  if(tab==='signup'){
+    tabs[1].classList.add('active'); tabs[0].classList.remove('active');
+    document.getElementById('modal-login').style.display='none';
+    document.getElementById('modal-signup').style.display='block';
+    document.getElementById('modalTitle').textContent='Create your account';
+    document.getElementById('modalSub').textContent='Join 48,000+ attorneys and clients on LexFind';
+  } else {
+    tabs[0].classList.add('active'); tabs[1].classList.remove('active');
+    document.getElementById('modal-login').style.display='block';
+    document.getElementById('modal-signup').style.display='none';
+    document.getElementById('modalTitle').textContent='Welcome back';
+    document.getElementById('modalSub').textContent='Sign in to access your account';
+  }
+}
+
+function closeModal(){
+  document.getElementById('loginModal').classList.remove('open');
+}
+
+function handleModalClick(e){
+  if(e.target.id==='loginModal') closeModal();
+}
+
+function switchModalTab(btn,tab){
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('modal-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('modal-signup').style.display = tab==='signup'?'block':'none';
+  document.getElementById('modalTitle').textContent = tab==='login'?'Welcome back':'Create your account';
+  document.getElementById('modalSub').textContent = tab==='login'?'Sign in to access your account':'Join 48,000+ attorneys and clients on LexFind';
+}
+
+function selectRole(role){
+  document.getElementById('roleClient').classList.toggle('selected', role==='client');
+  document.getElementById('roleAttorney').classList.toggle('selected', role==='attorney');
+}
+
+function doLogin(){
+  const email = document.getElementById('loginEmail').value || 'user@example.com';
+  const nameParts = email.split('@')[0].replace(/[._]/g,' ').split(' ');
+  const name = nameParts.map(w=>w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+  currentUser = {name, email, role:'Client', initials: nameParts.map(w=>w.charAt(0).toUpperCase()).join('').slice(0,2)};
+  closeModal(); afterLogin();
+}
+
+function doSignup(){
+  const name = document.getElementById('signupName').value || 'New User';
+  const email = document.getElementById('signupEmail').value || 'user@example.com';
+  const isAtty = document.getElementById('roleAttorney').classList.contains('selected');
+  const initials = name.split(' ').map(w=>w.charAt(0).toUpperCase()).join('').slice(0,2);
+  currentUser = {name, email, role: isAtty?'Attorney':'Client', initials};
+  closeModal(); afterLogin();
+}
+
+function afterLogin(){
+  document.getElementById('mainNav').style.display='flex';
+  document.getElementById('userAvatarNav').textContent = currentUser.initials;
+  document.getElementById('userNameNav').textContent = currentUser.name.split(' ')[0];
+  document.getElementById('dropdownName').textContent = currentUser.name;
+  document.getElementById('dropdownRole').textContent = currentUser.role+' Account';
+  goTo('search');
+  showToast('Welcome, '+currentUser.name.split(' ')[0]+'!');
+}
+
+function doLogout(){
+  currentUser=null;
+  document.getElementById('userDropdown').classList.remove('open');
+  document.getElementById('userProfileBtn').classList.remove('open');
+  document.getElementById('mainNav').style.display='none';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-landing').classList.add('active');
+  window.scrollTo(0,0);
+  showToast('Signed out successfully');
+}
+
+function toggleUserDropdown(){
+  const btn=document.getElementById('userProfileBtn');
+  const dd=document.getElementById('userDropdown');
+  btn.classList.toggle('open');
+  dd.classList.toggle('open');
+}
+
+document.addEventListener('click',function(e){
+  const wrap=document.getElementById('userProfileWrap');
+  if(wrap && !wrap.contains(e.target)){
+    document.getElementById('userProfileBtn').classList.remove('open');
+    document.getElementById('userDropdown').classList.remove('open');
+  }
+});
+
+// ══════ NAVIGATION ══════
+function goTo(page,lawyerId){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  window.scrollTo(0,0);
+  updateNav(page,lawyerId);
+  if(page==='case') initTimeline();
+}
+
+function updateNav(page,lawyerId){
+  const bc=document.getElementById('breadcrumb');
+  if(page==='search'){
+    bc.innerHTML='<span class="bc-cur">Find a Lawyer</span>';
+  } else if(page==='profile'){
+    const l=LAWYERS.find(x=>x.id===(lawyerId||'barakat'))||LAWYERS[0];
+    bc.innerHTML=`<button class="bc-link" onclick="goTo('search')">Find a Lawyer</button><span class="bc-sep">›</span><span class="bc-cur">${l.name}</span>`;
+  } else if(page==='case'){
+    bc.innerHTML=`<button class="bc-link" onclick="goTo('search')">Search</button><span class="bc-sep">›</span><button class="bc-link" onclick="goTo('profile')">Brian F. Barakat</button><span class="bc-sep">›</span><span class="bc-cur">Trident Real Estate v. Sonny & Ricardo</span>`;
+  }
+}
+
+// ══════ SEARCH FILTERS ══════
+function setPChip(el,val){
+  document.querySelectorAll('.pchip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  activeFilters.practice=val;
+  document.getElementById('searchPractice').value=val;
+  filterLawyers();
+}
+
+function setFilter(el,key,val){
+  const row=el.closest('.filters-row');
+  row.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if(key==='status') activeFilters.status=val;
+  else if(key==='cert') activeFilters.cert=(activeFilters.cert==='certified'?'':'certified');
+  else if(key==='rating') activeFilters.rating=(activeFilters.rating===4.8?0:4.8);
+  else if(key==='exp') activeFilters.exp=(activeFilters.exp===20?0:20);
+  else if(key==='win') activeFilters.win=(activeFilters.win===90?0:90);
+  filterLawyers();
+}
+
+function toggleAdvanced(btn){
+  const panel=document.getElementById('advFilters');
+  panel.classList.toggle('open');
+  btn.textContent=panel.classList.contains('open')?'✕ Close Filters':'⚙ Advanced Filters';
+}
+
+function filterLawyers(){
+  const name=document.getElementById('searchName').value.toLowerCase();
+  const practice=document.getElementById('searchPractice').value||activeFilters.practice;
+  const city=document.getElementById('searchCity').value.toLowerCase();
+  const state=document.getElementById('advState').value;
+  const minExp=parseInt(document.getElementById('advExp').value)||0;
+  const minWin=parseInt(document.getElementById('advWin').value)||0;
+  const minRating=parseFloat(document.getElementById('advRating').value)||0;
+  const avail=document.getElementById('advAvail').value;
+  const cert=document.getElementById('advCert').value;
+  const sort=document.getElementById('sortSelect').value;
+
+  let results=LAWYERS.filter(l=>{
+    if(name && !l.name.toLowerCase().includes(name) && !l.title.toLowerCase().includes(name)) return false;
+    if(practice && !l.practice.some(p=>p.toLowerCase().includes(practice.toLowerCase()))) return false;
+    if(city && !l.city.toLowerCase().includes(city) && !l.state.toLowerCase().includes(city)) return false;
+    if(state && l.state!==state) return false;
+    if(l.exp<minExp) return false;
+    if(l.winRate<minWin) return false;
+    if(l.rating<minRating) return false;
+    if(avail && l.availability!==avail) return false;
+    if(cert==='yes' && !l.certified) return false;
+    if(activeFilters.status==='available' && l.availability!=='available') return false;
+    if(activeFilters.cert==='certified' && !l.certified) return false;
+    if(l.rating<activeFilters.rating) return false;
+    if(l.exp<activeFilters.exp) return false;
+    if(l.winRate<activeFilters.win) return false;
+    return true;
+  });
+
+  results.sort((a,b)=>{
+    if(sort==='rating') return b.rating-a.rating;
+    if(sort==='exp') return b.exp-a.exp;
+    if(sort==='win') return b.winRate-a.winRate;
+    if(sort==='cases') return b.cases-a.cases;
+    return 0;
+  });
+
+  renderLawyers(results);
+}
+
+function clearFilters(){
+  document.getElementById('searchName').value='';
+  document.getElementById('searchPractice').value='';
+  document.getElementById('searchCity').value='';
+  document.getElementById('advState').value='';
+  document.getElementById('advExp').value='0';
+  document.getElementById('advWin').value='0';
+  document.getElementById('advRating').value='0';
+  document.getElementById('advAvail').value='';
+  document.getElementById('advCert').value='';
+  activeFilters={practice:'',status:'all',cert:'',rating:0,exp:0,win:0,avail:'',search:'',city:''};
+  document.querySelectorAll('.pchip').forEach(c=>c.classList.remove('active'));
+  document.querySelector('.pchip').classList.add('active');
+  filterLawyers();
+}
+
+function renderLawyers(list){
+  const grid=document.getElementById('lawyerGrid');
+  const none=document.getElementById('noResults');
+  document.getElementById('resultsCount').textContent=`Showing ${list.length} attorney${list.length!==1?'s':''}`;
+  if(!list.length){grid.innerHTML='';none.style.display='block';return;}
+  none.style.display='none';
+  grid.innerHTML=list.map(l=>{
+    const stars='★'.repeat(Math.floor(l.rating))+(l.rating%1>=.5?'½':'');
+    const availColor=l.availability==='available'?'#22C55E':l.availability==='busy'?'#F59E0B':'#EF4444';
+    const tags=l.practice.map((p,i)=>`<span class="lc-tag${i===0?' primary':''}">${p}</span>`).join('');
+    return `<div class="lawyer-card" onclick="openProfile('${l.id}')">
+      <div class="avail-dot" style="background:${availColor}"></div>
+      <div class="lc-top">
+        <div class="lc-avatar" style="background:${l.color}">${l.initials}</div>
+        <div class="lc-info">
+          <div class="lc-name">${l.name}</div>
+          <div class="lc-title">${l.title} · ${l.city}, ${l.state}</div>
+          <div class="lc-rating"><span class="stars">${'★'.repeat(Math.floor(l.rating))}</span>&nbsp;${l.rating.toFixed(1)} · ${l.exp} yrs exp${l.certified?' · <span style="color:var(--gold);font-weight:700">✓ Board Certified</span>':''}</div>
+        </div>
+      </div>
+      <div class="lc-tags">${tags}</div>
+      <div class="lc-stats">
+        <div class="lc-stat"><div class="lc-stat-val">${l.cases.toLocaleString()}+</div><div class="lc-stat-lbl">Cases</div></div>
+        <div class="lc-stat"><div class="lc-stat-val">${l.winRate}%</div><div class="lc-stat-lbl">Win Rate</div></div>
+        <div class="lc-stat"><div class="lc-stat-val">${l.rating}★</div><div class="lc-stat-lbl">Rating</div></div>
+      </div>
+      <div class="lc-bottom">
+        <div class="lc-fee">${l.fee} <span>· ${l.availability==='available'?'Available now':l.availability==='busy'?'Waitlist':'Unavailable'}</span></div>
+        <button class="lc-action" onclick="event.stopPropagation();openProfile('${l.id}')">View Profile →</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════ PROFILE ══════
+function openProfile(id){
+  const l=LAWYERS.find(x=>x.id===id)||LAWYERS[0];
+  document.getElementById('profileAvatar').textContent=l.initials;
+  document.getElementById('profileAvatar').style.background=l.color;
+  document.getElementById('profileName').textContent=l.name;
+  document.getElementById('profileFirm').textContent=l.title+' · '+l.city+', '+l.state;
+  document.getElementById('pkWin').textContent=l.winRate+'%';
+  document.getElementById('pkCases').textContent=l.cases.toLocaleString()+'+';
+  document.getElementById('pkWon').textContent=l.won.toLocaleString()+'+';
+  renderCasesList(l.caseList,'all','all');
+  window._currentLawyer=l;
+  goTo('profile',id);
+  switchTab(document.querySelector('.tab-btn'),'overview');
+}
+
+// ══════ PROFILE TABS ══════
+function switchTab(btn,tab){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ══════ PRO MODE ══════
+function togglePro(){
+  proModeOn=!proModeOn;
+  document.getElementById('proSection').style.display=proModeOn?'block':'none';
+  const btn=document.getElementById('proToggle');
+  btn.textContent=proModeOn?'✓ Pro Mode Active':'Unlock Pro View';
+  btn.className=proModeOn?'pro-toggle active':'pro-toggle';
+  showToast(proModeOn?'Pro intelligence mode enabled':'Pro mode disabled');
+}
+
+// ══════ CASE FILTERS (PROFILE) ══════
+function filterCases(el,type){
+  document.querySelectorAll('.case-filter-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentCaseType=type;
+  const status=document.getElementById('caseStatusFilter').value;
+  renderCasesList(window._currentLawyer.caseList,type,status);
+}
+
+function filterCasesByStatus(){
+  const status=document.getElementById('caseStatusFilter').value;
+  renderCasesList(window._currentLawyer.caseList,currentCaseType,status);
+}
+
+function renderCasesList(cases,type,status){
+  let filtered=cases.filter(c=>{
+    if(type!=='all' && c.type!==type) return false;
+    if(status!=='all' && c.status!==status) return false;
+    return true;
+  });
+  const container=document.getElementById('casesList');
+  if(!filtered.length){
+    container.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text3);font-size:13px">No cases match this filter. <button onclick="resetCaseFilters()" style="color:var(--blue);background:none;border:none;cursor:pointer;font-size:13px">Clear filters</button></div>';
+    return;
+  }
+  container.innerHTML=filtered.map(c=>{
+    const isTrindent=c.id==='trident';
+    return `<div class="case-row" onclick="${isTrindent?'goTo(\'case\')':'showToast(\'Loading case details...\')'}">
+      <div class="case-outcome-dot ${c.status}"></div>
+      <div class="case-info">
+        <div class="case-name">${c.name}</div>
+        <div class="case-meta">${c.court} · ${c.year}</div>
+      </div>
+      <span class="case-type-tag ${c.type}">${c.typeLabel}</span>
+      <span class="case-status-tag ${c.status}">${c.status.charAt(0).toUpperCase()+c.status.slice(1)}</span>
+    </div>`;
+  }).join('');
+}
+
+function resetCaseFilters(){
+  currentCaseType='all';document.getElementById('caseStatusFilter').value='all';
+  document.querySelectorAll('.case-filter-chip').forEach((c,i)=>{if(i===0)c.classList.add('active');else c.classList.remove('active')});
+  renderCasesList(window._currentLawyer.caseList,'all','all');
+}
+
+// ══════ TIMELINE ANIMATION ══════
+function initTimeline(){
+  const items=document.querySelectorAll('#caseTimeline .tl-item');
+  items.forEach(el=>el.classList.remove('vis'));
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const d=parseInt(e.target.dataset.d||0)*120;
+        setTimeout(()=>e.target.classList.add('vis'),d);
+      }
+    });
+  },{threshold:.15});
+  items.forEach(el=>io.observe(el));
+  setTimeout(()=>{
+    items.forEach((el,i)=>{
+      const r=el.getBoundingClientRect();
+      if(r.top<window.innerHeight) setTimeout(()=>el.classList.add('vis'),i*100);
+    });
+  },150);
+}
+
+// ══════ TOAST ══════
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ══════ INIT ══════
+document.addEventListener('DOMContentLoaded',()=>{
+  renderLawyers(LAWYERS);
+  window._currentLawyer=LAWYERS[0];
+  // Ensure only landing is shown on load — nav hidden until login
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-landing').classList.add('active');
+  document.getElementById('mainNav').style.display='none';
+});
+</script>
+</body>
+</html>
